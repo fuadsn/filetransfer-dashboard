@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AlertTriangle, ArrowLeft, Ban, Check, Copy, Star } from 'lucide-react'
 import type { ActivityAction, Transfer } from '../types'
 import { memberById } from '../data/mockData'
-import { attentionReasons, hasSecurityIssue } from '../lib/attention'
+import { attentionReasons } from '../lib/attention'
 import { deriveStatus, expiryLabel, fileTypeMeta, formatBytes, relativeTime } from '../lib/format'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -47,10 +47,14 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
-      <Button variant="ghost" size="sm" onClick={onBack} className="text-muted-foreground mb-4">
+      <button
+        type="button"
+        onClick={onBack}
+        className="text-muted-foreground hover:text-foreground mb-4 flex items-center gap-1.5 text-sm transition-colors"
+      >
         <ArrowLeft className="size-4" />
         Back to dashboard
-      </Button>
+      </button>
 
       {/* Header */}
       <Card className={cn(locked && 'opacity-90')}>
@@ -58,7 +62,7 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="mb-2 flex items-center gap-2">
-                <StatusPill status={status} security={hasSecurityIssue(transfer)} />
+                <StatusPill status={status} />
               </div>
               <h1 className="text-foreground font-title text-xl font-semibold tracking-tight">
                 {transfer.title}
@@ -100,7 +104,12 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
                 <Badge
                   key={r.kind}
                   variant="outline"
-                  className="bg-attention-soft text-attention border-transparent"
+                  className={cn(
+                    'border-transparent',
+                    r.severity === 'critical'
+                      ? 'bg-destructive/10 text-destructive'
+                      : 'bg-attention-soft text-attention',
+                  )}
                 >
                   <AlertTriangle className="size-3" />
                   {r.label}

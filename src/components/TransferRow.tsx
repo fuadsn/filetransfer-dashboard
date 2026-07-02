@@ -1,7 +1,6 @@
 import { Link2Off, Star } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
-import { hasSecurityIssue } from '../lib/attention'
 import { deriveStatus, expiryLabel, formatBytes, totalSize } from '../lib/format'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -16,7 +15,6 @@ interface TransferRowProps {
 
 export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowProps) {
   const status = deriveStatus(transfer)
-  const security = hasSecurityIssue(transfer)
   const sender = memberById(transfer.senderId)
   const recipients = transfer.recipientIds.map(memberById).filter(Boolean) as NonNullable<
     ReturnType<typeof memberById>
@@ -62,7 +60,7 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
       </div>
 
       <div className="w-32 shrink-0">
-        <StatusPill status={status} security={security} />
+        <StatusPill status={status} />
       </div>
 
       <div
