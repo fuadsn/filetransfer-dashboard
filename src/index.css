@@ -92,19 +92,22 @@
 
   --faint: #86848f;
 
-  --active: #34d399;
-  --active-soft: #0f2a20;
-  --expiring: #fbbf24;
-  --expiring-soft: #2c2410;
-  --expired: #94a3b8;
-  --expired-soft: #1b2436;
-  /* disabled = calm rose, kept clear of the --destructive danger red */
-  --disabled: #d69ba0;
-  --disabled-soft: #2a1c1e;
+  /* Status hues, muted into the palette so pills read as one family while
+     staying distinct: sage=active, dusty gold=expiring, lavender-gray=expired
+     (blends, since it's "dead"), dusty rose=disabled (echoes the mauve primary). */
+  --active: #9dc19a;
+  --active-soft: #3b473c;
+  --expiring: #d8be86;
+  --expiring-soft: #494233;
+  --expired: #b6b3c1;
+  --expired-soft: #46454f;
+  /* disabled = dusty rose in the mauve family, clear of the --destructive red */
+  --disabled: #cfa5a4;
+  --disabled-soft: #4c3f42;
 
-  --attention: #fbbf24;
-  --attention-soft: #241d0e;
-  --attention-border: #4a3c1a;
+  --attention: #dcc084;
+  --attention-soft: #443d2e;
+  --attention-border: #5b4f38;
 }
 
 /* Map tokens → Tailwind utilities (bg-primary, text-muted-foreground, …). */
