@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react'
+import { Link2Off, Star } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { deriveStatus, expiryLabel, formatBytes, totalSize } from '../lib/format'
@@ -41,15 +41,15 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
       <Avatar member={sender} size={40} />
 
       <div className="min-w-0 flex-1">
-        <span
-          className={cn(
-            'text-foreground font-title block truncate font-semibold',
-            // disabled = link cut intentionally; strike it through
-            status === 'disabled' && 'line-through',
+        <div className="flex items-center gap-1.5">
+          {/* disabled = link cut intentionally — an explicit "link off" mark */}
+          {status === 'disabled' && (
+            <Link2Off className="text-disabled size-3.5 shrink-0" aria-label="Link disabled" />
           )}
-        >
-          {transfer.title}
-        </span>
+          <span className="text-foreground font-title truncate font-semibold">
+            {transfer.title}
+          </span>
+        </div>
         <div className="text-muted-foreground mt-0.5 truncate text-sm">
           {sender?.name} · {transfer.files.length} file
           {transfer.files.length === 1 ? '' : 's'} · {formatBytes(totalSize(transfer))}
