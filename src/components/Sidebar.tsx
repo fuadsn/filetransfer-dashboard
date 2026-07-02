@@ -93,7 +93,7 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
               {/* Security — critical, red scheme, pinned above */}
               {critical.length > 0 && (
                 <section>
-                  <div className="bg-destructive/10 border-destructive/20 flex items-center gap-2 border-b px-4 py-3">
+                  <div className="flex items-center gap-2 border-b px-4 py-3">
                     <ShieldAlert className="text-destructive size-4 shrink-0" />
                     <h2 className="text-foreground text-sm font-semibold">Security</h2>
                     <span className="bg-destructive/15 text-destructive ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
