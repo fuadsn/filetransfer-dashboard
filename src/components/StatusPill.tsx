@@ -9,7 +9,7 @@ export function StatusPill({ status }: { status: TransferStatus }) {
     <Badge
       variant="outline"
       className={cn(
-        'gap-1.5 rounded-md border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase',
+        'gap-1.5 rounded-md border px-2.5 py-0.5 text-[11px] font-semibold capitalize',
         // text, dot (bg-current) and border all share the status color
         fg,
         bg,
