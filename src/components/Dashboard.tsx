@@ -39,7 +39,7 @@ export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite,
   const filtersOn = isFilterActive(ui)
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
+    <div className="mx-auto max-w-4xl px-4 py-6">
       <header className="mb-5">
         <h1 className="text-foreground font-title text-2xl font-semibold tracking-tight">
           Transfers
