@@ -31,7 +31,7 @@ export function EmptyState() {
         <Inbox className="size-7" />
       </div>
       <h3 className="text-foreground text-lg font-semibold">No transfers yet</h3>
-      <p className="text-muted-foreground mt-1 max-w-sm text-sm">
+      <p className="text-muted-foreground mt-1 max-w-sm font-sans text-sm">
         When your team sends or receives files, they'll show up here — with status, expiry, and
         what needs your attention.
       </p>
@@ -51,7 +51,7 @@ export function NoResultsState({ query, onClear }: { query: string; onClear: () 
         <SearchX className="size-7" />
       </div>
       <h3 className="text-foreground text-lg font-semibold">No matches</h3>
-      <p className="text-muted-foreground mt-1 text-sm">
+      <p className="text-muted-foreground mt-1 font-sans text-sm">
         {query ? (
           <>
             Nothing matches “<span className="text-foreground font-medium">{query}</span>”.

@@ -101,6 +101,11 @@
 
 /* Map tokens → Tailwind utilities (bg-primary, text-muted-foreground, …). */
 @theme inline {
+  /* Mono-forward type system. font-mono is the default; font-sans for prose. */
+  --font-mono:
+    'JetBrains Mono Variable', ui-monospace, 'SF Mono', 'Menlo', monospace;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -157,9 +162,8 @@ html.dark {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-mono;
     margin: 0;
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     transition:

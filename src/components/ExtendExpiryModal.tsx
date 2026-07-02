@@ -42,7 +42,9 @@ export function ExtendExpiryModal({ currentExpiresAt, onCancel, onConfirm }: Pro
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Extend expiry</DialogTitle>
-          <DialogDescription>Choose a new expiry date for this transfer.</DialogDescription>
+          <DialogDescription className="font-sans">
+            Choose a new expiry date for this transfer.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex gap-2">
