@@ -9,10 +9,10 @@ Mock data only — no backend, no auth, no real upload.
 ## Run
 
 ```bash
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # typecheck + production build
-npm run lint
+bun install
+bun dev          # http://localhost:5173
+bun run build    # typecheck + production build
+bun run lint
 ```
 
 Stack: **Vite + React 19 + TypeScript + Tailwind v4**.
