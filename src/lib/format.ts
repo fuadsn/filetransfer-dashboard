@@ -19,21 +19,24 @@ export function deriveStatus(t: Transfer, now: number = Date.now()): TransferSta
 
 interface StatusMeta {
   label: string
-  /** token names from index.css @theme */
+  /** Tailwind utility classes bound to index.css tokens. */
   fg: string
   bg: string
+  border: string
+  /** "live" statuses pulse their dot; terminal ones stay static. */
+  live: boolean
 }
 
 export function statusMeta(status: TransferStatus): StatusMeta {
   switch (status) {
     case 'active':
-      return { label: 'Active', fg: 'text-active', bg: 'bg-active-soft' }
+      return { label: 'Active', fg: 'text-active', bg: 'bg-active-soft', border: 'border-active/40', live: true }
     case 'expiring':
-      return { label: 'Expiring soon', fg: 'text-expiring', bg: 'bg-expiring-soft' }
+      return { label: 'Expiring soon', fg: 'text-expiring', bg: 'bg-expiring-soft', border: 'border-expiring/50', live: true }
     case 'expired':
-      return { label: 'Expired', fg: 'text-expired', bg: 'bg-expired-soft' }
+      return { label: 'Expired', fg: 'text-expired', bg: 'bg-expired-soft', border: 'border-expired/40', live: false }
     case 'disabled':
-      return { label: 'Disabled', fg: 'text-disabled', bg: 'bg-disabled-soft' }
+      return { label: 'Disabled', fg: 'text-disabled', bg: 'bg-disabled-soft', border: 'border-disabled/40', live: false }
   }
 }
 
