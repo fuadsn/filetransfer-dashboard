@@ -33,9 +33,9 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
       }}
       className={cn(
         'group hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer items-center gap-4 border-b px-5 py-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset',
-        // Dim inactive rows; disabled reads a touch heavier than expired.
-        status === 'expired' && 'opacity-65',
-        status === 'disabled' && 'opacity-55',
+        // Only disabled rows dim (the killed link); expired stays full contrast
+        // and is signalled by its pill + "Xd ago" metric.
+        status === 'disabled' && 'opacity-60',
       )}
     >
       <Avatar member={sender} size={40} />
