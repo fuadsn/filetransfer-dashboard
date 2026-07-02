@@ -21,30 +21,30 @@
 
   /* Light = the dark purple-gray/mauve palette inverted: dark text on an airy
      purple-gray canvas, white cards, mauve accent. */
-  --background: #ecebf0;
-  --foreground: #37353e;
-  --card: #ffffff;
-  --card-foreground: #37353e;
-  --popover: #ffffff;
-  --popover-foreground: #37353e;
+  --background: #e9e8ee;
+  --foreground: #3b3944;
+  --card: #f7f6fa;
+  --card-foreground: #3b3944;
+  --popover: #f7f6fa;
+  --popover-foreground: #3b3944;
 
   /* mauve primary (same hue as dark) */
   --primary: #715a5a;
   --primary-foreground: #f4f2f3;
-  --secondary: #e6e4ec;
-  --secondary-foreground: #37353e;
-  --muted: #e6e4ec;
-  --muted-foreground: #625f6b;
-  --accent: #ece3e7;
+  --secondary: #e4e2ea;
+  --secondary-foreground: #3b3944;
+  --muted: #e4e2ea;
+  --muted-foreground: #6a6874;
+  --accent: #e9e1e5;
   --accent-foreground: #5c4a50;
   --destructive: #b5453d;
 
-  --border: #dad8e1;
-  --input: #dad8e1;
+  --border: #d7d5df;
+  --input: #d7d5df;
   --ring: #715a5a;
 
   /* domain: tertiary text */
-  --faint: #8b8996;
+  --faint: #918f9b;
 
   /* domain: transfer status — muted into the purple-gray/mauve palette so the
      pills sit in the theme, still distinct: sage / ochre / gray-purple / rose. */
