@@ -176,10 +176,11 @@ function AttentionItem({ flagged, onOpen }: { flagged: Flagged; onOpen: (id: str
           <div className="text-foreground font-title truncate text-sm font-medium">
             {transfer.title}
           </div>
-          <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-xs">
             {expiry !== '—' && (
               <span className="text-muted-foreground whitespace-nowrap">{expiry}</span>
             )}
+            {expiry !== '—' && reasons.length > 0 && <span className="text-faint">·</span>}
             {reasons.length > 0 && (
               <span>
                 {reasons.map((r, i) => (
@@ -187,9 +188,7 @@ function AttentionItem({ flagged, onOpen }: { flagged: Flagged; onOpen: (id: str
                     {i > 0 && <span className="text-faint"> · </span>}
                     <span
                       className={
-                        r.kind === 'denied_after_disable'
-                          ? 'text-destructive font-semibold'
-                          : 'text-attention'
+                        r.kind === 'denied_after_disable' ? 'text-destructive' : 'text-attention'
                       }
                     >
                       {r.label}
