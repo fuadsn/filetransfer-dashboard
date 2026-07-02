@@ -20,19 +20,19 @@ interface Props {
 export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite, loading }: Props) {
   const filtered = useMemo(() => {
     const list = filterTransfers(transfers, ui)
-    // Live transfers first (soonest-expiring at top), then disabled, then
-    // expired — so actionable rows lead and the time column reads in order
-    // within the live group.
+    // Live transfers first (soonest-expiring at top), then expired, then
+    // disabled at the bottom — so actionable rows lead and the time column
+    // reads in order within the live group.
     const group = (t: Transfer) => {
       const s = deriveStatus(t)
-      return s === 'disabled' ? 1 : s === 'expired' ? 2 : 0
+      return s === 'disabled' ? 2 : s === 'expired' ? 1 : 0
     }
     return [...list].sort((a, b) => {
       const ga = group(a)
       const gb = group(b)
       if (ga !== gb) return ga - gb
       // expired group: most-recently expired first; otherwise soonest first
-      return ga === 2 ? b.expiresAt - a.expiresAt : a.expiresAt - b.expiresAt
+      return ga === 1 ? b.expiresAt - a.expiresAt : a.expiresAt - b.expiresAt
     })
   }, [transfers, ui])
 
