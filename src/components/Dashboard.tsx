@@ -19,6 +19,10 @@ interface Props {
 export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite, loading }: Props) {
   const filtered = useMemo(() => {
     const list = filterTransfers(transfers, ui)
+    // While searching, keep the fuzzy relevance order (title matches first,
+    // then name, then file) so the best hit leads. Only the unsearched list
+    // gets the status sort below.
+    if (ui.search.trim()) return list
     // Live transfers first (soonest-expiring at top), then expired, then
     // disabled at the bottom — so actionable rows lead and the time column
     // reads in order within the live group.
@@ -50,7 +54,9 @@ export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite,
           {filtered.length === 0 ? (
             <NoResultsState
               query={ui.search}
-              onClear={() => onUiChange({ search: '', memberId: null, status: null })}
+              onClear={() =>
+                onUiChange({ search: '', memberId: null, status: null, favoritesOnly: false })
+              }
             />
           ) : (
             <>

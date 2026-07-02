@@ -39,9 +39,15 @@ export interface UiState {
   search: string
   memberId: string | null
   status: string | null
+  favoritesOnly: boolean
 }
 
-export const defaultUiState: UiState = { search: '', memberId: null, status: null }
+export const defaultUiState: UiState = {
+  search: '',
+  memberId: null,
+  status: null,
+  favoritesOnly: false,
+}
 
 export function loadUiState(): UiState {
   return { ...defaultUiState, ...read<Partial<UiState>>(UI_KEY, {}) }

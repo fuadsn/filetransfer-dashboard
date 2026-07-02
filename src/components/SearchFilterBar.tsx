@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Search, X } from 'lucide-react'
+import { Search, Star, X } from 'lucide-react'
 import type { TransferStatus } from '../types'
 import { teamMembers } from '../data/mockData'
 import { statusMeta } from '../lib/format'
@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 
-// Stage 4. Search + combinable member/status filters with a visible "clear all".
+// Stage 4. Search + combinable favorites / member / status filters with a
+// visible "clear all". Status filters use the same pill language as the table.
 
 const STATUSES: TransferStatus[] = ['active', 'expiring', 'expired', 'disabled']
 
@@ -25,6 +26,8 @@ interface Props {
   ui: UiState
   onChange: (next: UiState) => void
 }
+
+const CLEARED: UiState = { search: '', memberId: null, status: null, favoritesOnly: false }
 
 export function SearchFilterBar({ ui, onChange }: Props) {
   const active = isFilterActive(ui)
@@ -84,6 +87,21 @@ export function SearchFilterBar({ ui, onChange }: Props) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        {/* Starred filter */}
+        <Button
+          type="button"
+          size="sm"
+          variant={ui.favoritesOnly ? 'default' : 'outline'}
+          onClick={() => onChange({ ...ui, favoritesOnly: !ui.favoritesOnly })}
+          className="h-7 gap-1.5 rounded-full px-3 text-xs"
+        >
+          <Star className={cn('size-3.5', ui.favoritesOnly && 'fill-current')} />
+          Starred
+        </Button>
+
+        <Separator orientation="vertical" className="mx-1 !h-4" />
+
+        {/* Member filter */}
         {teamMembers.map((m) => {
           const on = ui.memberId === m.id
           return (
@@ -102,23 +120,28 @@ export function SearchFilterBar({ ui, onChange }: Props) {
 
         <Separator orientation="vertical" className="mx-1 !h-4" />
 
+        {/* Status filter — same pill language as the table; selected = ringed */}
         {STATUSES.map((s) => {
           const on = ui.status === s
           const meta = statusMeta(s)
-          // Selected → the status-pill look; unselected → neutral chip with the
-          // status-colored dot, so the color always ties back to the pills.
           return (
             <button
               key={s}
               type="button"
+              aria-pressed={on}
               onClick={() => onChange({ ...ui, status: on ? null : s })}
               className={cn(
-                'inline-flex h-7 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors',
-                on ? cn(meta.bg, meta.border) : 'border-border hover:bg-muted',
+                'inline-flex items-center gap-1.5 rounded border border-transparent px-2 py-1 text-[11px] font-medium transition-all outline-none',
+                meta.bg,
+                meta.fg,
+                on
+                  ? 'ring-primary ring-offset-background ring-2 ring-offset-1'
+                  : 'opacity-50 hover:opacity-100',
+                'focus-visible:ring-primary focus-visible:ring-2',
               )}
             >
-              <span className={cn('size-1.5 shrink-0 rounded-full bg-current', meta.fg)} />
-              <span className={on ? meta.fg : 'text-muted-foreground'}>{meta.label}</span>
+              <span className="size-1.5 shrink-0 rounded-full bg-current" />
+              {meta.label}
             </button>
           )
         })}
@@ -128,7 +151,7 @@ export function SearchFilterBar({ ui, onChange }: Props) {
             type="button"
             size="sm"
             variant="ghost"
-            onClick={() => onChange({ search: '', memberId: null, status: null })}
+            onClick={() => onChange(CLEARED)}
             className="text-primary h-7 gap-1 px-2 text-xs"
           >
             <X className="size-3" />
