@@ -93,6 +93,15 @@ export function relativeExpiry(expiresAt: number, now: number = Date.now()): str
   return `in ${Math.round(diff / DAY)} day${Math.round(diff / DAY) === 1 ? '' : 's'}`
 }
 
+/**
+ * Expiry label for a transfer. A disabled link is dead, so showing a live
+ * countdown ("in 2 days") is misleading — surface its state instead.
+ */
+export function expiryLabel(t: Transfer, now: number = Date.now()): string {
+  if (t.disabled) return 'Link disabled'
+  return relativeExpiry(t.expiresAt, now)
+}
+
 /** Generic "x ago" for activity timestamps. */
 export function relativeTime(timestamp: number, now: number = Date.now()): string {
   const diff = now - timestamp

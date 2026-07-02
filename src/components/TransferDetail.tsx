@@ -3,7 +3,7 @@ import { AlertTriangle, ArrowLeft, Ban, Check, Copy, Star } from 'lucide-react'
 import type { ActivityAction, Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { attentionReasons } from '../lib/attention'
-import { deriveStatus, fileTypeMeta, formatBytes, relativeExpiry, relativeTime } from '../lib/format'
+import { deriveStatus, expiryLabel, fileTypeMeta, formatBytes, relativeTime } from '../lib/format'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -70,7 +70,7 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
                 <span>{new Date(transfer.createdAt).toLocaleDateString()}</span>
                 <span>·</span>
                 <span className={cn(status === 'expiring' && 'text-expiring font-medium')}>
-                  {relativeExpiry(transfer.expiresAt)}
+                  {expiryLabel(transfer)}
                 </span>
               </div>
             </div>

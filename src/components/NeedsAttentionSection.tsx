@@ -2,7 +2,7 @@ import { AlertTriangle } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { attentionReasons } from '../lib/attention'
-import { relativeExpiry } from '../lib/format'
+import { expiryLabel } from '../lib/format'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Avatar } from './Avatar'
@@ -60,7 +60,7 @@ export function NeedsAttentionSection({ transfers, onOpen }: Props) {
                 </div>
               </div>
               <span className="text-muted-foreground shrink-0 text-xs whitespace-nowrap">
-                {relativeExpiry(transfer.expiresAt)}
+                {expiryLabel(transfer)}
               </span>
             </button>
           )
