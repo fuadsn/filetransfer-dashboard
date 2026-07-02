@@ -4,93 +4,103 @@ import { memberById } from '../data/mockData'
 import { deriveStatus } from './format'
 import type { UiState } from './storage'
 
-// Pure filter/search over the transfer list. Search spans title + sender name
-// + file names (PRD §4.3); member + status filters are combinable with search.
+// Pure filter/search over the transfer list.
 //
-// The text query is fuzzy (Fuse.js) and TIERED by priority: title first, then
-// sender name, then file names — so a match on the title always outranks a
-// match on a filename. Each field gets its own threshold: titles are long and
-// descriptive so a looser match helps, but names are short, so we match them
-// tighter — close spelling variants ("aisha" ↔ "aysha") still hit, unrelated
-// names don't. Member + status filters stay exact.
+// Order of operations matters: the exact, combinable pill filters
+// (favorites / member / status) GATE the data FIRST, then the fuzzy text query
+// runs only over that narrowed subset — so fuzzy search never reaches past the
+// pills you've selected.
+//
+// The text query is fuzzy (Fuse.js). Results rank by MATCH QUALITY first (a
+// near-exact hit wins), with field priority — title > name > file — used only
+// to break ties between equally-good matches. So "aysha" ranks Aisha (a strong
+// name match) above a row whose title merely fuzzes close. Every field shares
+// the same threshold so each gets an equal chance to match.
 
-const shared: Pick<IFuseOptions<Transfer>, 'ignoreLocation'> = { ignoreLocation: true }
+const THRESHOLD = 0.35
 
-const TITLE_OPTIONS: IFuseOptions<Transfer> = {
-  ...shared,
-  threshold: 0.4,
-  keys: [{ name: 'title', getFn: (t) => t.title }],
-}
+const makeOptions = (
+  name: string,
+  getFn: (t: Transfer) => string | string[],
+): IFuseOptions<Transfer> => ({
+  ignoreLocation: true, // match anywhere in the field, not just near the start
+  threshold: THRESHOLD,
+  includeScore: true, // needed to rank across fields by quality
+  keys: [{ name, getFn }],
+})
 
-const NAME_OPTIONS: IFuseOptions<Transfer> = {
-  ...shared,
-  threshold: 0.28, // tighter: short names shouldn't over-match
-  keys: [{ name: 'sender', getFn: (t) => memberById(t.senderId)?.name ?? '' }],
-}
+const TITLE_OPTIONS = makeOptions('title', (t) => t.title)
+const NAME_OPTIONS = makeOptions('sender', (t) => memberById(t.senderId)?.name ?? '')
+const FILE_OPTIONS = makeOptions('files', (t) => t.files.map((f) => f.name))
 
-const FILE_OPTIONS: IFuseOptions<Transfer> = {
-  ...shared,
-  threshold: 0.4,
-  keys: [{ name: 'files', getFn: (t) => t.files.map((f) => f.name) }],
+// Exact pill filters — no fuzziness. These decide which transfers even reach
+// the text search.
+function matchesPills(t: Transfer, ui: UiState): boolean {
+  if (ui.favoritesOnly && !t.favorited) return false
+  if (ui.memberId) {
+    const involved = t.senderId === ui.memberId || t.recipientIds.includes(ui.memberId)
+    if (!involved) return false
+  }
+  if (ui.status && deriveStatus(t) !== ui.status) return false
+  return true
 }
 
 // Rebuilding indices on every keystroke is wasteful; cache them and only
-// rebuild when the underlying transfer list identity changes (a
-// favorite/disable/extend mutation), not when the query changes.
+// rebuild when the scoped subset would actually differ — i.e. the transfer
+// list identity changes (a favorite/disable/extend mutation) or a pill filter
+// changes. A keystroke alone reuses the cached indices.
 let cachedTransfers: Transfer[] | null = null
+let cachedScopeKey: string | null = null
 let cachedIndices: { title: Fuse<Transfer>; name: Fuse<Transfer>; file: Fuse<Transfer> } | null =
   null
 
-function getIndices(transfers: Transfer[]) {
-  if (cachedIndices === null || cachedTransfers !== transfers) {
+function scopeKey(ui: UiState): string {
+  return `${ui.memberId ?? ''}|${ui.status ?? ''}|${ui.favoritesOnly ? 1 : 0}`
+}
+
+function getIndices(scoped: Transfer[], transfers: Transfer[], key: string) {
+  if (cachedIndices === null || cachedTransfers !== transfers || cachedScopeKey !== key) {
     cachedIndices = {
-      title: new Fuse(transfers, TITLE_OPTIONS),
-      name: new Fuse(transfers, NAME_OPTIONS),
-      file: new Fuse(transfers, FILE_OPTIONS),
+      title: new Fuse(scoped, TITLE_OPTIONS),
+      name: new Fuse(scoped, NAME_OPTIONS),
+      file: new Fuse(scoped, FILE_OPTIONS),
     }
     cachedTransfers = transfers
+    cachedScopeKey = key
   }
   return cachedIndices
 }
 
 /**
- * Fuzzy search returning transfers in priority order (title → name → file
- * matches), each transfer appearing once at its highest-priority tier.
+ * Fuzzy search over an already-scoped subset. Each transfer keeps its single
+ * best hit across fields; results sort by score (lower = better match), with
+ * field tier (title 0 → name 1 → file 2) breaking ties. So the strongest match
+ * always leads, and title wins only when matches are equally good.
  */
-function fuzzySearch(transfers: Transfer[], query: string): Transfer[] {
-  const { title, name, file } = getIndices(transfers)
-  const seen = new Set<string>()
-  const ordered: Transfer[] = []
-  for (const index of [title, name, file]) {
-    for (const { item } of index.search(query)) {
-      if (!seen.has(item.id)) {
-        seen.add(item.id)
-        ordered.push(item)
+function fuzzySearch(scoped: Transfer[], transfers: Transfer[], ui: UiState, query: string) {
+  const { title, name, file } = getIndices(scoped, transfers, scopeKey(ui))
+  const best = new Map<string, { item: Transfer; score: number; tier: number }>()
+  ;[title, name, file].forEach((index, tier) => {
+    for (const { item, score } of index.search(query)) {
+      const s = score ?? 1
+      const prev = best.get(item.id)
+      if (!prev || s < prev.score || (s === prev.score && tier < prev.tier)) {
+        best.set(item.id, { item, score: s, tier })
       }
     }
-  }
-  return ordered
+  })
+  return [...best.values()]
+    .sort((a, b) => a.score - b.score || a.tier - b.tier)
+    .map((h) => h.item)
 }
 
 export function filterTransfers(transfers: Transfer[], ui: UiState): Transfer[] {
+  // 1. Exact pill filters gate the data first.
+  const scoped = transfers.filter((t) => matchesPills(t, ui))
+
+  // 2. Fuzzy text query runs only over that scoped subset.
   const q = ui.search.trim()
-
-  // Fuzzy-match the text query first (falls through to the full list when empty).
-  const matched = q ? fuzzySearch(transfers, q) : transfers
-
-  // Then apply the exact, combinable favorites + member + status filters.
-  return matched.filter((t) => {
-    if (ui.favoritesOnly && !t.favorited) return false
-
-    if (ui.memberId) {
-      const involved = t.senderId === ui.memberId || t.recipientIds.includes(ui.memberId)
-      if (!involved) return false
-    }
-
-    if (ui.status && deriveStatus(t) !== ui.status) return false
-
-    return true
-  })
+  return q ? fuzzySearch(scoped, transfers, ui, q) : scoped
 }
 
 export function isFilterActive(ui: UiState): boolean {
