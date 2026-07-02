@@ -19,9 +19,9 @@
 :root {
   --radius: 0.65rem;
 
-  /* Light = inverted dark palette: the dark bg becomes text, the light text
-     becomes the canvas, mauve stays the accent. */
-  --background: #d3dad9;
+  /* Light = the dark purple-gray/mauve palette inverted: dark text on an airy
+     purple-gray canvas, white cards, mauve accent. */
+  --background: #ecebf0;
   --foreground: #37353e;
   --card: #ffffff;
   --card-foreground: #37353e;
@@ -31,38 +31,37 @@
   /* mauve primary (same hue as dark) */
   --primary: #715a5a;
   --primary-foreground: #f4f2f3;
-  --secondary: #e6e9e8;
+  --secondary: #e6e4ec;
   --secondary-foreground: #37353e;
-  --muted: #e6e9e8;
-  --muted-foreground: #605e69;
-  --accent: #ede4e7;
+  --muted: #e6e4ec;
+  --muted-foreground: #625f6b;
+  --accent: #ece3e7;
   --accent-foreground: #5c4a50;
   --destructive: #b5453d;
 
-  --border: #cbd2d1;
-  --input: #cbd2d1;
+  --border: #dad8e1;
+  --input: #dad8e1;
   --ring: #715a5a;
 
   /* domain: tertiary text */
-  --faint: #8a8894;
+  --faint: #8b8996;
 
-  /* domain: transfer status (fg + soft bg). Clean light-badge palette —
-     soft tint-100 fills + readable 600/700 text. */
-  --active: #15803d;
-  --active-soft: #dcfce7;
-  --expiring: #b45309;
-  --expiring-soft: #fef3c7;
-  --expired: #475569;
-  --expired-soft: #e7ecf3;
-  /* disabled = intentional off-state: a calm muted rose, distinct from the
-     true-danger red reserved for --destructive. */
-  --disabled: #9f5b63;
-  --disabled-soft: #f3e7e8;
+  /* domain: transfer status — muted into the purple-gray/mauve palette so the
+     pills sit in the theme, still distinct: sage / ochre / gray-purple / rose. */
+  --active: #4f6b54;
+  --active-soft: #dde7dc;
+  --expiring: #8a6636;
+  --expiring-soft: #efe2ca;
+  --expired: #605d6b;
+  --expired-soft: #e4e2e8;
+  /* disabled = muted rose in the mauve family, clear of --destructive red */
+  --disabled: #815863;
+  --disabled-soft: #ecdfe3;
 
-  /* domain: needs-attention (amber — blue's complement) */
-  --attention: #b45309;
-  --attention-soft: #fdf6ec;
-  --attention-border: #f3d9a8;
+  /* domain: needs-attention (ochre, matches expiring) */
+  --attention: #8a6636;
+  --attention-soft: #f0e6d1;
+  --attention-border: #ddc9a4;
 }
 
 .dark {
