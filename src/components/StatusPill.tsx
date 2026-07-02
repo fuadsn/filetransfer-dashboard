@@ -16,9 +16,9 @@ export function StatusPill({ status }: { status: TransferStatus }) {
         border,
       )}
     >
-      {/* dot animates per status: soft blink / fast blink / throb / static */}
+      {/* dot stays solid (the indicator); label is lightened to read softer */}
       <span className={cn('inline-flex size-1.5 shrink-0 rounded-full bg-current', dot)} />
-      {label}
+      <span className="opacity-70">{label}</span>
     </Badge>
   )
 }
