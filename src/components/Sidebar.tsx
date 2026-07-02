@@ -41,10 +41,19 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
       <div className="flex h-full w-80 flex-col">
         <div className="flex items-center justify-between px-4 py-4">
           <div className="min-w-0">
-            <div className="font-title text-foreground truncate font-semibold">
-              Team Cloud
-            </div>
-            <div className="text-muted-foreground text-xs">Workspace</div>
+            {loading ? (
+              <div className="space-y-1.5 py-0.5">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            ) : (
+              <>
+                <div className="font-title text-foreground truncate font-semibold">
+                  Team Cloud
+                </div>
+                <div className="text-muted-foreground text-xs">Workspace</div>
+              </>
+            )}
           </div>
           <Button variant="ghost" size="icon" onClick={onToggle} aria-label="Collapse sidebar">
             <PanelRightClose className="size-4" />
@@ -55,14 +64,20 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
 
         {/* Section header — its own banded compartment, divided from the list */}
         <div className="flex items-center gap-2 border-b px-4 py-3">
-          <AlertTriangle className="text-attention size-4 shrink-0" />
-          <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
           {loading ? (
-            <Skeleton className="ml-auto h-5 w-6 rounded-full" />
+            <>
+              <Skeleton className="size-4 shrink-0 rounded" />
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="ml-auto h-5 w-6 rounded-full" />
+            </>
           ) : (
-            <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
-              {flagged.length}
-            </span>
+            <>
+              <AlertTriangle className="text-attention size-4 shrink-0" />
+              <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
+              <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
+                {flagged.length}
+              </span>
+            </>
           )}
         </div>
 
