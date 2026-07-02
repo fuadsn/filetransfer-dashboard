@@ -205,6 +205,8 @@ html.dark {
   body {
     @apply bg-background text-foreground font-mono;
     margin: 0;
+    /* JetBrains Mono runs wide; pull it in so rows read tight, not bloated. */
+    letter-spacing: -0.02em;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     transition:
