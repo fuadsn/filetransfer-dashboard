@@ -45,16 +45,16 @@
   /* domain: tertiary text */
   --faint: #93a1bd;
 
-  /* domain: transfer status (fg + soft bg). Rich fg + saturated soft bg in
-     light mode so pills pop against the light theme. */
-  --active: #166534;
-  --active-soft: #bfe8cf;
-  --expiring: #9a3412;
-  --expiring-soft: #f7d5ac;
-  --expired: #334155;
-  --expired-soft: #d5dde9;
+  /* domain: transfer status (fg + soft bg). Clean light-badge palette —
+     soft tint-100 fills + readable 600/700 text. */
+  --active: #15803d;
+  --active-soft: #dcfce7;
+  --expiring: #b45309;
+  --expiring-soft: #fef3c7;
+  --expired: #475569;
+  --expired-soft: #f1f5f9;
   --disabled: #b91c1c;
-  --disabled-soft: #f7c9c9;
+  --disabled-soft: #fee2e2;
 
   /* domain: needs-attention (amber — blue's complement) */
   --attention: #b45309;
