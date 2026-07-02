@@ -45,9 +45,9 @@ export function AvatarStack({ members, max = 3 }: { members: TeamMember[]; max?:
   const extra = members.length - shown.length
   return (
     <div className="flex items-center">
-      <div className="flex -space-x-2">
+      <div className="flex -space-x-3">
         {shown.map((m) => (
-          <Avatar key={m.id} member={m} size={24} ring />
+          <Avatar key={m.id} member={m} size={40} className="border-background border-2" />
         ))}
       </div>
       {extra > 0 && <span className="text-muted-foreground ml-2 text-xs">+{extra}</span>}
