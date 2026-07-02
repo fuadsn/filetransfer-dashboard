@@ -19,7 +19,7 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
   const recipients = transfer.recipientIds.map(memberById).filter(Boolean) as NonNullable<
     ReturnType<typeof memberById>
   >[]
-  const dimmed = status === 'expired' || status === 'disabled'
+  const inactive = status === 'expired' || status === 'disabled'
 
   return (
     <div
@@ -34,7 +34,9 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
       }}
       className={cn(
         'group hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer items-center gap-4 border-b px-5 py-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset',
-        dimmed && 'opacity-70',
+        // Signal inactivity with a faint background tint, not reduced opacity,
+        // so text keeps full contrast (WCAG).
+        inactive && 'bg-muted/30',
       )}
     >
       <Avatar member={sender} size={40} />
