@@ -19,31 +19,32 @@
 :root {
   --radius: 0.65rem;
 
-  /* base */
-  --background: #f5f6f9;
-  --foreground: #0d1626;
+  /* Light = inverted dark palette: the dark bg becomes text, the light text
+     becomes the canvas, mauve stays the accent. */
+  --background: #d3dad9;
+  --foreground: #37353e;
   --card: #ffffff;
-  --card-foreground: #0d1626;
+  --card-foreground: #37353e;
   --popover: #ffffff;
-  --popover-foreground: #0d1626;
+  --popover-foreground: #37353e;
 
-  /* blue primary */
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --secondary: #eaeff8;
-  --secondary-foreground: #0d1626;
-  --muted: #eaeff8;
-  --muted-foreground: #57668a;
-  --accent: #e6efff;
-  --accent-foreground: #1d4ed8;
-  --destructive: #dc2626;
+  /* mauve primary (same hue as dark) */
+  --primary: #715a5a;
+  --primary-foreground: #f4f2f3;
+  --secondary: #e6e9e8;
+  --secondary-foreground: #37353e;
+  --muted: #e6e9e8;
+  --muted-foreground: #605e69;
+  --accent: #ede4e7;
+  --accent-foreground: #5c4a50;
+  --destructive: #b5453d;
 
-  --border: #dde2ec;
-  --input: #dde2ec;
-  --ring: #2563eb;
+  --border: #cbd2d1;
+  --input: #cbd2d1;
+  --ring: #715a5a;
 
   /* domain: tertiary text */
-  --faint: #7a89a8;
+  --faint: #8a8894;
 
   /* domain: transfer status (fg + soft bg). Clean light-badge palette —
      soft tint-100 fills + readable 600/700 text. */
