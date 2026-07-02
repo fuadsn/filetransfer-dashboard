@@ -1,7 +1,7 @@
 import { Star } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
-import { deriveStatus, formatBytes, relativeExpiry, totalSize } from '../lib/format'
+import { deriveStatus, expiryLabel, formatBytes, totalSize } from '../lib/format'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarStack } from './Avatar'
@@ -58,7 +58,7 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
       </div>
 
       <div className="text-muted-foreground w-28 shrink-0 text-right text-sm whitespace-nowrap">
-        {relativeExpiry(transfer.expiresAt)}
+        {expiryLabel(transfer)}
       </div>
 
       <Button
@@ -70,10 +70,10 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
           onToggleFavorite(transfer.id)
         }}
         className={cn(
+          // Always visible on every row for consistency: filled gold when
+          // favorited, muted outline otherwise (brightens on hover).
           'size-8 shrink-0',
-          transfer.favorited
-            ? 'text-expiring hover:text-expiring'
-            : 'text-faint opacity-0 group-hover:opacity-100',
+          transfer.favorited ? 'text-expiring hover:text-expiring' : 'text-faint hover:text-foreground',
         )}
       >
         <Star className={cn('size-4', transfer.favorited && 'fill-current')} />
