@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { AlertTriangle, PanelRightClose } from 'lucide-react'
+import { AlertTriangle, PanelRightClose, Star } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { attentionReasons } from '../lib/attention'
@@ -21,10 +21,23 @@ interface Props {
 
 // Collapsible left sidebar: brand + the "Needs attention" panel. Inline on
 // large screens (width collapses), an overlay drawer on small ones.
+// A post-disable access attempt is a security red flag — it outranks any
+// time-based urgency.
+const isCritical = (reasons: ReturnType<typeof attentionReasons>) =>
+  reasons.some((r) => r.kind === 'denied_after_disable')
+
 export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
   const flagged = transfers
     .map((t) => ({ transfer: t, reasons: attentionReasons(t) }))
     .filter((x) => x.reasons.length > 0)
+    // Critical (security) first, then most-imminent expiry — an attention feed
+    // surfaces the biggest emergencies at the top.
+    .sort((a, b) => {
+      const ca = isCritical(a.reasons) ? 0 : 1
+      const cb = isCritical(b.reasons) ? 0 : 1
+      if (ca !== cb) return ca - cb
+      return a.transfer.expiresAt - b.transfer.expiresAt
+    })
 
   return (
     <aside
@@ -97,32 +110,51 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
               {flagged.map(({ transfer, reasons }) => {
                 const sender = memberById(transfer.senderId)
                 const expiry = expiryLabel(transfer)
+                const critical = isCritical(reasons)
                 return (
                   <button
                     key={transfer.id}
                     type="button"
                     onClick={() => onOpen(transfer.id)}
-                    className="hover:bg-muted focus-visible:ring-ring block w-full px-2.5 py-3 text-left transition-colors outline-none focus-visible:ring-2"
+                    className={cn(
+                      'hover:bg-muted focus-visible:ring-ring block w-full border-l-2 px-2.5 py-3 text-left transition-colors outline-none focus-visible:ring-2',
+                      // critical (security) rows carry a red accent bar
+                      critical ? 'border-destructive' : 'border-transparent',
+                    )}
                   >
                     <div className="flex items-start gap-2.5">
-                      <Avatar member={sender} size={26} />
+                      {/* avatar + carried-over star (favorited context) */}
+                      <div className="flex shrink-0 flex-col items-center gap-1">
+                        <Avatar member={sender} size={26} />
+                        {transfer.favorited && (
+                          <Star className="text-expiring size-3 fill-current" aria-label="Starred" />
+                        )}
+                      </div>
                       <div className="min-w-0 flex-1">
                         <div className="text-foreground font-title truncate text-sm font-medium">
                           {transfer.title}
                         </div>
                         {/* date + reasons share a line when they fit; the whole
                             reason group drops to its own line rather than
-                            breaking mid-group. Date muted, reasons amber. */}
+                            breaking mid-group. Date muted; critical reason red. */}
                         <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
                           {expiry !== '—' && (
                             <span className="text-muted-foreground whitespace-nowrap">{expiry}</span>
                           )}
                           {reasons.length > 0 && (
-                            <span className="text-attention">
+                            <span>
                               {reasons.map((r, i) => (
                                 <Fragment key={r.kind}>
                                   {i > 0 && <span className="text-faint"> · </span>}
-                                  {r.label}
+                                  <span
+                                    className={cn(
+                                      r.kind === 'denied_after_disable'
+                                        ? 'text-destructive font-semibold'
+                                        : 'text-attention',
+                                    )}
+                                  >
+                                    {r.label}
+                                  </span>
                                 </Fragment>
                               ))}
                             </span>
