@@ -1,0 +1,93 @@
+@import 'tailwindcss';
+
+/*
+  Design tokens for Team Cloud Workspace — dual theme.
+
+  Tailwind v4 utilities (bg-surface, text-muted, …) reference these vars, so the
+  whole app re-skins by swapping token VALUES — no component edits. The theme is
+  selected by `data-theme` on <html> (see useTheme + the inline boot script in
+  index.html). Semantic names keep this to one file, not forty.
+
+  DARK is the hero: a black + electric-blue aesthetic.
+  LIGHT is a complementing cool-white scheme with the same blue primary.
+*/
+
+/* LIGHT (default) — cool white, blue primary, warm-amber attention accent */
+@theme {
+  --color-canvas: #f4f6fb; /* app background */
+  --color-surface: #ffffff; /* cards / rows */
+  --color-surface-2: #eaeff8; /* subtle fills, skeletons */
+  --color-border: #dbe2ef;
+  --color-ink: #0d1626; /* primary text (near-black navy) */
+  --color-muted: #57668a; /* secondary text */
+  --color-faint: #93a1bd; /* tertiary text */
+
+  --color-brand: #2563eb; /* blue-600 */
+  --color-brand-soft: #e6efff;
+
+  /* status palette — keep in sync with statusMeta() in lib/format.ts */
+  --color-active: #16a34a;
+  --color-active-soft: #e7f6ec;
+  --color-expiring: #b45309;
+  --color-expiring-soft: #fdf1e0;
+  --color-expired: #64748b;
+  --color-expired-soft: #eef1f6;
+  --color-disabled: #dc2626;
+  --color-disabled-soft: #fdecec;
+
+  /* orange/amber is blue's complement — reads as intentional, not random */
+  --color-attention: #b45309;
+  --color-attention-soft: #fdf6ec;
+  --color-attention-border: #f3d9a8;
+}
+
+/* DARK — black + blue. Overrides the raw values; utilities are unchanged. */
+[data-theme='dark'] {
+  --color-canvas: #070b14; /* near-black, blue undertone */
+  --color-surface: #0f1626; /* lifted panels */
+  --color-surface-2: #182135; /* subtle fills, skeletons */
+  --color-border: #243149;
+  --color-ink: #e9eefb; /* soft blue-white */
+  --color-muted: #95a5c4;
+  --color-faint: #5c6d8f;
+
+  --color-brand: #4d8bff; /* electric blue */
+  --color-brand-soft: #16233f;
+
+  --color-active: #34d399;
+  --color-active-soft: #0f2a20;
+  --color-expiring: #fbbf24;
+  --color-expiring-soft: #2c2410;
+  --color-expired: #94a3b8;
+  --color-expired-soft: #1b2436;
+  --color-disabled: #f87171;
+  --color-disabled-soft: #331a1c;
+
+  --color-attention: #fbbf24;
+  --color-attention-soft: #241d0e;
+  --color-attention-border: #4a3c1a;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Native form controls (e.g. the date picker) follow the active theme. */
+html {
+  color-scheme: light;
+}
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
