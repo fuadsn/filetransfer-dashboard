@@ -19,7 +19,6 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
   const recipients = transfer.recipientIds.map(memberById).filter(Boolean) as NonNullable<
     ReturnType<typeof memberById>
   >[]
-  const inactive = status === 'expired' || status === 'disabled'
 
   return (
     <div
@@ -34,15 +33,21 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
       }}
       className={cn(
         'group hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer items-center gap-4 border-b px-5 py-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset',
-        // Signal inactivity with a faint background tint, not reduced opacity,
-        // so text keeps full contrast (WCAG).
-        inactive && 'bg-muted/30',
+        // Dim inactive rows; disabled reads a touch heavier than expired.
+        status === 'expired' && 'opacity-65',
+        status === 'disabled' && 'opacity-55',
       )}
     >
       <Avatar member={sender} size={40} />
 
       <div className="min-w-0 flex-1">
-        <span className="text-foreground font-title block truncate font-semibold">
+        <span
+          className={cn(
+            'text-foreground font-title block truncate font-semibold',
+            // disabled = link cut intentionally; strike it through
+            status === 'disabled' && 'line-through',
+          )}
+        >
           {transfer.title}
         </span>
         <div className="text-muted-foreground mt-0.5 truncate text-sm">
