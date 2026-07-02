@@ -7,12 +7,13 @@
     <title>Team Cloud Workspace</title>
     <script>
       // Set theme before first paint to avoid a flash. Default: dark (black + blue).
+      // shadcn/ui toggles on the `.dark` class.
       (function () {
         try {
           var t = localStorage.getItem('tcw:theme')
-          document.documentElement.dataset.theme = t === 'light' ? 'light' : 'dark'
+          if (t !== 'light') document.documentElement.classList.add('dark')
         } catch (e) {
-          document.documentElement.dataset.theme = 'dark'
+          document.documentElement.classList.add('dark')
         }
       })()
     </script>
