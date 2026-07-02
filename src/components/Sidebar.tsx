@@ -25,10 +25,8 @@ interface Flagged {
   reasons: AttentionReason[]
 }
 
-// A post-disable access attempt is a security red flag — its own section,
-// above the ordinary time-based warnings.
-const isCritical = (reasons: AttentionReason[]) =>
-  reasons.some((r) => r.kind === 'denied_after_disable')
+// Critical (security) reasons get their own section above the time-based ones.
+const isCritical = (reasons: AttentionReason[]) => reasons.some((r) => r.severity === 'critical')
 
 const bySoonestExpiry = (a: Flagged, b: Flagged) => a.transfer.expiresAt - b.transfer.expiresAt
 
@@ -187,9 +185,7 @@ function AttentionItem({ flagged, onOpen }: { flagged: Flagged; onOpen: (id: str
                   <Fragment key={r.kind}>
                     {i > 0 && <span className="text-faint"> · </span>}
                     <span
-                      className={
-                        r.kind === 'denied_after_disable' ? 'text-destructive' : 'text-attention'
-                      }
+                      className={r.severity === 'critical' ? 'text-destructive' : 'text-attention'}
                     >
                       {r.label}
                     </span>

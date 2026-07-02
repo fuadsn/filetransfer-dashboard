@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AlertTriangle, ArrowLeft, Ban, Check, Copy, Star } from 'lucide-react'
 import type { ActivityAction, Transfer } from '../types'
 import { memberById } from '../data/mockData'
-import { attentionReasons } from '../lib/attention'
+import { attentionReasons, hasSecurityIssue } from '../lib/attention'
 import { deriveStatus, expiryLabel, fileTypeMeta, formatBytes, relativeTime } from '../lib/format'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -58,7 +58,7 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="mb-2 flex items-center gap-2">
-                <StatusPill status={status} />
+                <StatusPill status={status} security={hasSecurityIssue(transfer)} />
               </div>
               <h1 className="text-foreground font-title text-xl font-semibold tracking-tight">
                 {transfer.title}
