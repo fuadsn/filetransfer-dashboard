@@ -82,23 +82,24 @@ const HOUR = 60 * MIN
 const DAY = 24 * HOUR
 
 /**
- * Human relative time for an expiry moment.
- * Future -> "in 3 days" / "2h left"; past -> "expired 4d ago".
+ * Human relative time for an expiry moment. The status pill already names the
+ * state, so the past form is the bare metric ("4d ago"), not "expired 4d ago".
+ * Future -> "in 3 days" / "2h left"; past -> "4d ago".
  */
 export function relativeExpiry(expiresAt: number, now: number = Date.now()): string {
   const diff = expiresAt - now
-  if (diff <= 0) return `expired ${shortDuration(-diff)} ago`
+  if (diff <= 0) return `${shortDuration(-diff)} ago`
   if (diff < HOUR) return `${Math.max(1, Math.round(diff / MIN))}m left`
   if (diff < DAY) return `${Math.round(diff / HOUR)}h left`
   return `in ${Math.round(diff / DAY)} day${Math.round(diff / DAY) === 1 ? '' : 's'}`
 }
 
 /**
- * Expiry label for a transfer. A disabled link is dead, so showing a live
- * countdown ("in 2 days") is misleading — surface its state instead.
+ * Expiry label for a transfer. A disabled link has no meaningful countdown and
+ * the pill already says "Disabled", so show an em dash rather than restating it.
  */
 export function expiryLabel(t: Transfer, now: number = Date.now()): string {
-  if (t.disabled) return 'Link disabled'
+  if (t.disabled) return '—'
   return relativeExpiry(t.expiresAt, now)
 }
 
