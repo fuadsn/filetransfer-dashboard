@@ -111,7 +111,13 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
               {/* Needs attention — time-based warnings, amber */}
               {attention.length > 0 && (
                 <section>
-                  <div className="flex items-center gap-2 border-b px-4 py-3">
+                  <div
+                    className={cn(
+                      'flex items-center gap-2 border-b px-4 py-3',
+                      // top line to separate it from the Security section above
+                      critical.length > 0 && 'border-t',
+                    )}
+                  >
                     <AlertTriangle className="text-attention size-4 shrink-0" />
                     <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
                     <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
