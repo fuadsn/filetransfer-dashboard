@@ -57,7 +57,13 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
         <StatusPill status={status} />
       </div>
 
-      <div className="text-muted-foreground w-28 shrink-0 text-right text-sm whitespace-nowrap">
+      <div
+        className={cn(
+          'w-28 shrink-0 text-right text-sm whitespace-nowrap',
+          // urgency carries into the countdown so it scans instantly
+          status === 'expiring' ? 'text-expiring font-medium' : 'text-muted-foreground',
+        )}
+      >
         {expiryLabel(transfer)}
       </div>
 
