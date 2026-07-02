@@ -15,7 +15,8 @@ bun run build    # typecheck + production build
 bun run lint
 ```
 
-Stack: **Vite + React 19 + TypeScript + Tailwind v4**.
+Stack: **Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui** (Radix
+primitives, lucide-react icons, sonner toasts).
 
 ## Design decisions (worth reading before scoring)
 
@@ -33,9 +34,16 @@ Stack: **Vite + React 19 + TypeScript + Tailwind v4**.
   favorite / disable / extend-expiry actions are stored separately in
   `localStorage` and merged on top (`src/lib/useTransfers.ts`). Regenerating the
   mock data never wipes the user's changes, and the persisted blob stays tiny.
-- **Semantic design tokens.** Colors live once in `@theme` (`src/index.css`) with
-  semantic names (`surface`, `muted`, `attention`…), so a dark-mode / rebrand
-  pass is one file, not forty.
+- **Built on shadcn/ui.** UI is composed from shadcn primitives (Button, Card,
+  Input, Badge, Avatar, Dialog, Skeleton, Sonner, Separator) in
+  `src/components/ui/`, with lucide-react icons. The app-specific components wrap
+  these rather than hand-rolling markup.
+- **One token system, bridged to the theme.** `src/index.css` uses shadcn's
+  semantic tokens (`--background`, `--primary`, `--muted-foreground`…) mapped via
+  `@theme inline`, with values pointing at our palette: **dark = the black + blue
+  hero theme**, **light = a complementing cool-white scheme**. Domain tokens
+  shadcn doesn't provide (transfer status colors, the amber attention accent)
+  live alongside. Theme swaps on the `.dark` class — a rebrand is one file.
 
 ## Architecture
 
@@ -49,16 +57,19 @@ src/
     filter.ts            search + combinable member/status filters
     storage.ts           localStorage read/write (overrides + UI state)
     useTransfers.ts      state backbone: base data + overrides + mutations
+    useTheme.ts          light/dark theme (.dark class) + persistence
+    utils.ts             cn() — shadcn class merge helper
   components/
+    ui/                  shadcn/ui primitives (button, card, dialog, sonner, …)
     Dashboard.tsx        list + needs-attention + search/filter + states
     NeedsAttentionSection.tsx
     SearchFilterBar.tsx
     TransferList.tsx / TransferRow.tsx
-    StatusPill.tsx / Avatar.tsx
+    StatusPill.tsx / Avatar.tsx / ThemeToggle.tsx
     States.tsx           skeleton / empty / no-results
     TransferDetail.tsx   detail screen + actions
-    ExtendExpiryModal.tsx / Toast.tsx
-  App.tsx                view routing (dashboard | detail) + overlays
+    ExtendExpiryModal.tsx
+  App.tsx                view routing (dashboard | detail) + overlays (toasts via sonner)
 ```
 
 ## Build order / status
