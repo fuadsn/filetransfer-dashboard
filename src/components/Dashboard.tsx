@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import type { Transfer } from '../types'
+import { deriveStatus } from '../lib/format'
 import { filterTransfers, isFilterActive } from '../lib/filter'
 import type { UiState } from '../lib/storage'
 import { NeedsAttentionSection } from './NeedsAttentionSection'
@@ -19,12 +20,19 @@ interface Props {
 export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite, loading }: Props) {
   const filtered = useMemo(() => {
     const list = filterTransfers(transfers, ui)
-    // Sort by expiry: closest-to-expiring (and already-expired) first, furthest
-    // last — so the time column reads in strict order. Disabled links have no
-    // meaningful countdown, so they sink to the bottom.
+    // Live transfers first (soonest-expiring at top), then expired, then
+    // disabled — so actionable rows lead and the time column reads in order
+    // within the live group.
+    const group = (t: Transfer) => {
+      const s = deriveStatus(t)
+      return s === 'disabled' ? 2 : s === 'expired' ? 1 : 0
+    }
     return [...list].sort((a, b) => {
-      if (a.disabled !== b.disabled) return a.disabled ? 1 : -1
-      return a.expiresAt - b.expiresAt
+      const ga = group(a)
+      const gb = group(b)
+      if (ga !== gb) return ga - gb
+      // expired group: most-recently expired first; otherwise soonest first
+      return ga === 1 ? b.expiresAt - a.expiresAt : a.expiresAt - b.expiresAt
     })
   }, [transfers, ui])
 
