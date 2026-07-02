@@ -102,12 +102,10 @@
 
 /* Map tokens → Tailwind utilities (bg-primary, text-muted-foreground, …). */
 @theme inline {
-  /* Type system: mono is the default body face; sans for prose; Montserrat
-     (font-title) for display — transfer titles and page headings. */
-  --font-mono:
-    'JetBrains Mono Variable', ui-monospace, 'SF Mono', 'Menlo', monospace;
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-title: 'Montserrat Variable', 'Inter Variable', ui-sans-serif, sans-serif;
+  /* One typeface — Montserrat — with weight for hierarchy (semibold titles,
+     regular body). font-sans and font-title both resolve to it. */
+  --font-sans: 'Montserrat Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-title: 'Montserrat Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -203,10 +201,9 @@ html.dark {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground font-mono;
+    @apply bg-background text-foreground font-sans;
     margin: 0;
-    /* JetBrains Mono runs wide; pull it in so rows read tight, not bloated. */
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     transition:
