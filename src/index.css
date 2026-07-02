@@ -20,7 +20,7 @@
   --radius: 0.65rem;
 
   /* base */
-  --background: #f4f6fb;
+  --background: #f5f6f9;
   --foreground: #0d1626;
   --card: #ffffff;
   --card-foreground: #0d1626;
@@ -38,12 +38,12 @@
   --accent-foreground: #1d4ed8;
   --destructive: #dc2626;
 
-  --border: #dbe2ef;
-  --input: #dbe2ef;
+  --border: #dde2ec;
+  --input: #dde2ec;
   --ring: #2563eb;
 
   /* domain: tertiary text */
-  --faint: #93a1bd;
+  --faint: #7a89a8;
 
   /* domain: transfer status (fg + soft bg). Clean light-badge palette —
      soft tint-100 fills + readable 600/700 text. */
@@ -52,9 +52,11 @@
   --expiring: #b45309;
   --expiring-soft: #fef3c7;
   --expired: #475569;
-  --expired-soft: #f1f5f9;
-  --disabled: #b91c1c;
-  --disabled-soft: #fee2e2;
+  --expired-soft: #e7ecf3;
+  /* disabled = intentional off-state: a calm muted rose, distinct from the
+     true-danger red reserved for --destructive. */
+  --disabled: #9f5b63;
+  --disabled-soft: #f3e7e8;
 
   /* domain: needs-attention (amber — blue's complement) */
   --attention: #b45309;
@@ -63,28 +65,33 @@
 }
 
 .dark {
-  --background: #070b14;
-  --foreground: #e9eefb;
-  --card: #0f1626;
-  --card-foreground: #e9eefb;
-  --popover: #0f1626;
-  --popover-foreground: #e9eefb;
+  /* Earthy palette — proportions follow the source swatches:
+     #1B211A (most) → surfaces · #628141 (2nd) → borders/fills ·
+     #8BAE66 (3rd) → primary/ring · #EBD5AB (least) → text. */
+  --background: #1b211a;
+  --foreground: #ebd5ab;
+  /* lift surfaces clearly off the near-black background so cards/dialogs read
+     as elevated layers */
+  --card: #232c20;
+  --card-foreground: #ebd5ab;
+  --popover: #232c20;
+  --popover-foreground: #ebd5ab;
 
-  --primary: #4d8bff;
-  --primary-foreground: #06122b;
-  --secondary: #182135;
-  --secondary-foreground: #e9eefb;
-  --muted: #182135;
-  --muted-foreground: #95a5c4;
-  --accent: #16233f;
-  --accent-foreground: #cfe0ff;
-  --destructive: #f87171;
+  --primary: #8bae66;
+  --primary-foreground: #1b211a;
+  --secondary: #33402a;
+  --secondary-foreground: #ebd5ab;
+  --muted: #2b3524;
+  --muted-foreground: #b0bd96;
+  --accent: #3a4a2b;
+  --accent-foreground: #ebd5ab;
+  --destructive: #e08a6a;
 
-  --border: #243149;
-  --input: #2a3a57;
-  --ring: #4d8bff;
+  --border: #44532f;
+  --input: #44532f;
+  --ring: #8bae66;
 
-  --faint: #5c6d8f;
+  --faint: #85926a;
 
   --active: #34d399;
   --active-soft: #0f2a20;
@@ -92,8 +99,9 @@
   --expiring-soft: #2c2410;
   --expired: #94a3b8;
   --expired-soft: #1b2436;
-  --disabled: #f87171;
-  --disabled-soft: #331a1c;
+  /* disabled = calm rose, kept clear of the --destructive danger red */
+  --disabled: #d69ba0;
+  --disabled-soft: #2a1c1e;
 
   --attention: #fbbf24;
   --attention-soft: #241d0e;
