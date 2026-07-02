@@ -17,7 +17,7 @@ export function ThemeToggle({ theme, onToggle }: Props) {
       onClick={onToggle}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Light mode' : 'Dark mode'}
-      className="bg-card fixed top-4 right-4 z-40 rounded-full shadow-sm"
+      className="bg-card rounded-full shadow-sm"
     >
       {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
     </Button>

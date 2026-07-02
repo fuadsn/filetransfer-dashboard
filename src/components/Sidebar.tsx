@@ -1,4 +1,4 @@
-import { AlertTriangle, PanelLeftClose } from 'lucide-react'
+import { AlertTriangle, PanelRightClose } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { attentionReasons } from '../lib/attention'
@@ -27,12 +27,12 @@ export function Sidebar({ transfers, open, onToggle, onOpen }: Props) {
     <aside
       className={cn(
         'bg-card border-border z-40 flex flex-col',
-        // mobile: fixed overlay drawer
-        'fixed inset-y-0 left-0 w-80 border-r transition-transform duration-200',
-        open ? 'translate-x-0' : '-translate-x-full',
+        // mobile: fixed overlay drawer on the right
+        'fixed inset-y-0 right-0 w-80 border-l transition-transform duration-200',
+        open ? 'translate-x-0' : 'translate-x-full',
         // desktop: sticky in-flow, collapse by width
         'lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:transition-[width] lg:duration-200',
-        open ? 'lg:w-80' : 'lg:w-0 lg:overflow-hidden lg:border-r-0',
+        open ? 'lg:w-80' : 'lg:w-0 lg:overflow-hidden lg:border-l-0',
       )}
     >
       <div className="flex h-full w-80 flex-col">
@@ -44,7 +44,7 @@ export function Sidebar({ transfers, open, onToggle, onOpen }: Props) {
             <div className="text-muted-foreground text-xs">Workspace</div>
           </div>
           <Button variant="ghost" size="icon" onClick={onToggle} aria-label="Collapse sidebar">
-            <PanelLeftClose className="size-4" />
+            <PanelRightClose className="size-4" />
           </Button>
         </div>
 

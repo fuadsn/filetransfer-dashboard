@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
-import { PanelLeft } from 'lucide-react'
+import { PanelRight } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Transfer } from './types'
 import { useTransfers } from './lib/useTransfers'
@@ -75,24 +75,17 @@ export default function App() {
         />
       )}
 
-      <Sidebar
-        transfers={transfers}
-        open={sidebarOpen}
-        onToggle={() => setSidebarOpen((o) => !o)}
-        onOpen={openTransfer}
-      />
-
       <main className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center gap-2 px-4 pt-4">
+        <div className="flex items-center justify-end gap-2 px-4 pt-4">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen((o) => !o)}
             aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           >
-            <PanelLeft className="size-4" />
+            <PanelRight className="size-4" />
           </Button>
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
 
         <Routes>
@@ -123,6 +116,13 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+
+      <Sidebar
+        transfers={transfers}
+        open={sidebarOpen}
+        onToggle={() => setSidebarOpen((o) => !o)}
+        onOpen={openTransfer}
+      />
 
       {extending && (
         <ExtendExpiryModal
