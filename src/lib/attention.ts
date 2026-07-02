@@ -13,20 +13,9 @@ import { EXPIRING_WINDOW_MS } from './format'
 
 const STALE_WINDOW_MS = 48 * 60 * 60 * 1000 // 48h
 
-// Words that mark a transfer as carrying sensitive/regulated content.
-const SENSITIVE = /payroll|salary|wire|bank|invoice|tax|nda|contract|legal|confidential|investor|ssn|passport/i
-
-function isSensitive(t: Transfer): boolean {
-  return SENSITIVE.test(t.title) || t.files.some((f) => SENSITIVE.test(f.name))
-}
-
 export type AttentionSeverity = 'critical' | 'warning'
 
-export type AttentionReasonKind =
-  | 'expiring'
-  | 'denied_after_disable'
-  | 'sensitive_exposed'
-  | 'stale_no_activity'
+export type AttentionReasonKind = 'expiring' | 'denied_after_disable' | 'stale_no_activity'
 
 export interface AttentionReason {
   kind: AttentionReasonKind
@@ -49,15 +38,6 @@ export function attentionReasons(t: Transfer, now: number = Date.now()): Attenti
     reasons.push({
       kind: 'denied_after_disable',
       label: 'Access attempted after disabling',
-      severity: 'critical',
-    })
-  }
-
-  // Sensitive/regulated content reachable through a still-live link.
-  if (live && isSensitive(t)) {
-    reasons.push({
-      kind: 'sensitive_exposed',
-      label: 'Sensitive data on a live link',
       severity: 'critical',
     })
   }
