@@ -19,8 +19,13 @@ interface Props {
 export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite, loading }: Props) {
   const filtered = useMemo(() => {
     const list = filterTransfers(transfers, ui)
-    // Default sort: most recent first. (Needs-attention is pinned separately.)
-    return [...list].sort((a, b) => b.createdAt - a.createdAt)
+    // Sort by expiry: closest-to-expiring (and already-expired) first, furthest
+    // last — so the time column reads in strict order. Disabled links have no
+    // meaningful countdown, so they sink to the bottom.
+    return [...list].sort((a, b) => {
+      if (a.disabled !== b.disabled) return a.disabled ? 1 : -1
+      return a.expiresAt - b.expiresAt
+    })
   }, [transfers, ui])
 
   const filtersOn = isFilterActive(ui)
