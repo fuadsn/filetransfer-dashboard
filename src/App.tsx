@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { PanelLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Transfer } from './types'
 import { useTransfers } from './lib/useTransfers'
@@ -9,21 +10,38 @@ import { Dashboard } from './components/Dashboard'
 import { TransferDetail } from './components/TransferDetail'
 import { ExtendExpiryModal } from './components/ExtendExpiryModal'
 import { ThemeToggle } from './components/ThemeToggle'
+import { Sidebar } from './components/Sidebar'
+import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 
-// App shell: owns URL-driven routing (dashboard at "/", each transfer at
-// "/transfers/:id"), persisted UI state, and the transient modal/toast overlays.
-// Data + mutations live in useTransfers.
+const SIDEBAR_KEY = 'tcw:sidebar'
+
+// App shell: a collapsible left sidebar (brand + needs-attention) beside a
+// centered main column. Owns routing, persisted UI state, and overlays.
 export default function App() {
   const { transfers, toggleFavorite, setDisabled, extendExpiry } = useTransfers()
   const { theme, toggle: toggleTheme } = useTheme()
   const navigate = useNavigate()
 
+  // Sidebar open/collapsed — persisted; defaults open on desktop, closed on mobile.
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+    const saved = localStorage.getItem(SIDEBAR_KEY)
+    if (saved !== null) return saved === '1'
+    return window.innerWidth >= 1024
+  })
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_KEY, sidebarOpen ? '1' : '0')
+    } catch {
+      // best-effort
+    }
+  }, [sidebarOpen])
+
   // Persisted search/filter state.
   const [ui, setUi] = useState<UiState>(() => loadUiState())
   useEffect(() => saveUiState(ui), [ui])
 
-  // Extend-expiry overlay (rendered app-level so it works from any route).
+  // Extend-expiry overlay.
   const [extendingId, setExtendingId] = useState<string | null>(null)
   const extending = transfers.find((t) => t.id === extendingId) ?? null
 
@@ -41,37 +59,70 @@ export default function App() {
     })
   }
 
-  return (
-    <div className="min-h-full">
-      <ThemeToggle theme={theme} onToggle={toggleTheme} />
+  const openTransfer = (id: string) => {
+    navigate(`/transfers/${id}`)
+    if (window.innerWidth < 1024) setSidebarOpen(false)
+  }
 
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Dashboard
-              transfers={transfers}
-              ui={ui}
-              onUiChange={setUi}
-              onOpen={(id) => navigate(`/transfers/${id}`)}
-              onToggleFavorite={toggleFavorite}
-              loading={loading}
-            />
-          }
+  return (
+    <div className="flex min-h-screen">
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden
         />
-        <Route
-          path="/transfers/:id"
-          element={
-            <TransferRoute
-              transfers={transfers}
-              onToggleFavorite={toggleFavorite}
-              onDisable={handleDisable}
-              onExtendClick={setExtendingId}
-            />
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      )}
+
+      <Sidebar
+        transfers={transfers}
+        open={sidebarOpen}
+        onToggle={() => setSidebarOpen((o) => !o)}
+        onOpen={openTransfer}
+      />
+
+      <main className="flex min-w-0 flex-1 flex-col">
+        <div className="flex items-center gap-2 px-4 pt-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen((o) => !o)}
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            <PanelLeft className="size-4" />
+          </Button>
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        </div>
+
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Dashboard
+                transfers={transfers}
+                ui={ui}
+                onUiChange={setUi}
+                onOpen={(id) => navigate(`/transfers/${id}`)}
+                onToggleFavorite={toggleFavorite}
+                loading={loading}
+              />
+            }
+          />
+          <Route
+            path="/transfers/:id"
+            element={
+              <TransferRoute
+                transfers={transfers}
+                onToggleFavorite={toggleFavorite}
+                onDisable={handleDisable}
+                onExtendClick={setExtendingId}
+              />
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
 
       {extending && (
         <ExtendExpiryModal

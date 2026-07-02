@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
 import type { Transfer } from '../types'
 import { deriveStatus } from '../lib/format'
-import { filterTransfers, isFilterActive } from '../lib/filter'
+import { filterTransfers } from '../lib/filter'
 import type { UiState } from '../lib/storage'
-import { NeedsAttentionSection } from './NeedsAttentionSection'
 import { SearchFilterBar } from './SearchFilterBar'
 import { EmptyState, NoResultsState, SkeletonRows } from './States'
 import { TransferList } from './TransferList'
@@ -31,33 +30,18 @@ export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite,
       const ga = group(a)
       const gb = group(b)
       if (ga !== gb) return ga - gb
-      // expired group: most-recently expired first; otherwise soonest first
       return ga === 1 ? b.expiresAt - a.expiresAt : a.expiresAt - b.expiresAt
     })
   }, [transfers, ui])
 
-  const filtersOn = isFilterActive(ui)
-
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6">
-      <header className="mb-5">
-        <h1 className="text-foreground font-title text-2xl font-semibold tracking-tight">
-          Transfers
-        </h1>
-        <p className="text-muted-foreground font-sans text-sm">
-          Files your team has sent and received — status, expiry, and what needs attention.
-        </p>
-      </header>
-
+    <div className="mx-auto w-full max-w-3xl px-4 pt-4 pb-8">
       {loading ? (
         <SkeletonRows />
       ) : transfers.length === 0 ? (
         <EmptyState />
       ) : (
         <>
-          {/* Needs-attention only makes sense against the unfiltered set */}
-          {!filtersOn && <NeedsAttentionSection transfers={transfers} onOpen={onOpen} />}
-
           <SearchFilterBar ui={ui} onChange={onUiChange} />
 
           {filtered.length === 0 ? (
@@ -67,7 +51,7 @@ export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite,
             />
           ) : (
             <>
-              <div className="mb-2 px-1 text-xs text-faint">
+              <div className="text-faint mb-2 px-1 text-xs">
                 {filtered.length} transfer{filtered.length === 1 ? '' : 's'}
               </div>
               <TransferList
