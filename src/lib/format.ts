@@ -23,20 +23,20 @@ interface StatusMeta {
   fg: string
   bg: string
   border: string
-  /** "live" statuses pulse their dot; terminal ones stay static. */
-  live: boolean
+  /** Per-status dot animation utility ('' = static). */
+  dot: string
 }
 
 export function statusMeta(status: TransferStatus): StatusMeta {
   switch (status) {
     case 'active':
-      return { label: 'Active', fg: 'text-active', bg: 'bg-active-soft', border: 'border-active/20', live: true }
+      return { label: 'Active', fg: 'text-active', bg: 'bg-active-soft', border: 'border-active/20', dot: 'animate-blink-soft' }
     case 'expiring':
-      return { label: 'Expiring soon', fg: 'text-expiring', bg: 'bg-expiring-soft', border: 'border-expiring/25', live: true }
+      return { label: 'Expiring soon', fg: 'text-expiring', bg: 'bg-expiring-soft', border: 'border-expiring/25', dot: 'animate-blink-fast' }
     case 'expired':
-      return { label: 'Expired', fg: 'text-expired', bg: 'bg-expired-soft', border: 'border-expired/20', live: false }
+      return { label: 'Expired', fg: 'text-expired', bg: 'bg-expired-soft', border: 'border-expired/20', dot: '' }
     case 'disabled':
-      return { label: 'Disabled', fg: 'text-disabled', bg: 'bg-disabled-soft', border: 'border-disabled/20', live: false }
+      return { label: 'Disabled', fg: 'text-disabled', bg: 'bg-disabled-soft', border: 'border-disabled/20', dot: 'animate-throb' }
   }
 }
 
