@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { useTransfers } from './lib/useTransfers'
 import { loadUiState, saveUiState, type UiState } from './lib/storage'
 import { useTheme } from './lib/useTheme'
 import { Dashboard } from './components/Dashboard'
 import { TransferDetail } from './components/TransferDetail'
 import { ExtendExpiryModal } from './components/ExtendExpiryModal'
-import { Toast, type ToastState } from './components/Toast'
 import { ThemeToggle } from './components/ThemeToggle'
+import { Toaster } from '@/components/ui/sonner'
 
 // App shell: owns the top-level view (dashboard | detail), persisted UI state,
 // and the transient modal/toast overlays. Data + mutations live in useTransfers.
@@ -22,10 +23,9 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selected = transfers.find((t) => t.id === selectedId) ?? null
 
-  // Overlays.
+  // Extend-expiry overlay.
   const [extendingId, setExtendingId] = useState<string | null>(null)
   const extending = transfers.find((t) => t.id === extendingId) ?? null
-  const [toast, setToast] = useState<ToastState | null>(null)
 
   // Fake initial load so the skeleton state is demoable.
   const [loading, setLoading] = useState(true)
@@ -36,10 +36,8 @@ export default function App() {
 
   const handleDisable = (id: string) => {
     setDisabled(id, true)
-    setToast({
-      message: 'Link disabled',
-      actionLabel: 'Undo',
-      onAction: () => setDisabled(id, false),
+    toast('Link disabled', {
+      action: { label: 'Undo', onClick: () => setDisabled(id, false) },
     })
   }
 
@@ -73,12 +71,12 @@ export default function App() {
           onConfirm={(newExpiresAt) => {
             extendExpiry(extending.id, newExpiresAt)
             setExtendingId(null)
-            setToast({ message: 'Expiry extended' })
+            toast.success('Expiry extended')
           }}
         />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
+      <Toaster />
     </div>
   )
 }

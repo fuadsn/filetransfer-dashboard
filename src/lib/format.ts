@@ -1,3 +1,4 @@
+import { File, FileArchive, FileText, Image, Video, type LucideIcon } from 'lucide-react'
 import type { FileType, Transfer, TransferStatus } from '../types'
 
 // Threshold at which an active transfer is considered "expiring soon".
@@ -36,21 +37,21 @@ export function statusMeta(status: TransferStatus): StatusMeta {
   }
 }
 
-/** Emoji stand-ins keep the scaffold dependency-free; swap for real icons in polish. */
-export function fileTypeMeta(type: FileType): { icon: string; label: string } {
+/** Maps a file type to a lucide icon + label. */
+export function fileTypeMeta(type: FileType): { Icon: LucideIcon; label: string } {
   switch (type) {
     case 'pdf':
-      return { icon: '📄', label: 'PDF' }
+      return { Icon: FileText, label: 'PDF' }
     case 'image':
-      return { icon: '🖼️', label: 'Image' }
+      return { Icon: Image, label: 'Image' }
     case 'video':
-      return { icon: '🎬', label: 'Video' }
+      return { Icon: Video, label: 'Video' }
     case 'zip':
-      return { icon: '🗜️', label: 'Archive' }
+      return { Icon: FileArchive, label: 'Archive' }
     case 'doc':
-      return { icon: '📝', label: 'Document' }
+      return { Icon: FileText, label: 'Document' }
     default:
-      return { icon: '📁', label: 'File' }
+      return { Icon: File, label: 'File' }
   }
 }
 

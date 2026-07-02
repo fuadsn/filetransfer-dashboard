@@ -1,7 +1,19 @@
 import { useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 
-// Stage 7 (micro-interaction). Quick-select chips (+1d / +7d) or a date input.
-// Scaffolded and functional; polish the transitions / validation as time allows.
+// Stage 7 (micro-interaction). Quick-select chips (+1d / +7d / +30d) or a date
+// input. Rendered only while extending, so internal state is fresh each open.
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -23,66 +35,52 @@ export function ExtendExpiryModal({ currentExpiresAt, onCancel, onConfirm }: Pro
     { label: '+30 days', value: base + 30 * DAY },
   ]
 
-  // yyyy-MM-dd for the date input
   const asDateInput = (ms: number) => new Date(ms).toISOString().slice(0, 10)
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onCancel}
-    >
-      <div
-        className="w-full max-w-sm rounded-xl bg-surface p-5 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="text-base font-semibold text-ink">Extend expiry</h3>
-        <p className="mt-1 text-sm text-muted">Choose a new expiry date for this transfer.</p>
+    <Dialog open onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Extend expiry</DialogTitle>
+          <DialogDescription>Choose a new expiry date for this transfer.</DialogDescription>
+        </DialogHeader>
 
-        <div className="mt-4 flex gap-2">
+        <div className="flex gap-2">
           {quick.map((q) => (
-            <button
+            <Button
               key={q.label}
               type="button"
+              variant={target === q.value ? 'default' : 'outline'}
               onClick={() => setTarget(q.value)}
-              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                target === q.value
-                  ? 'border-brand bg-brand-soft text-brand'
-                  : 'border-border text-muted hover:bg-surface-2'
-              }`}
+              className={cn('flex-1')}
             >
               {q.label}
-            </button>
+            </Button>
           ))}
         </div>
 
-        <label className="mt-4 block text-xs font-medium text-muted">
-          Or pick a date
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="expiry-date" className="text-muted-foreground text-xs">
+            Or pick a date
+          </Label>
+          <Input
+            id="expiry-date"
             type="date"
             value={asDateInput(target)}
             min={asDateInput(now)}
             onChange={(e) => setTarget(new Date(e.target.value).getTime())}
-            className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-brand"
           />
-        </label>
-
-        <div className="mt-5 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-surface-2"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={() => onConfirm(target)}
-            className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90"
-          >
-            Extend
-          </button>
         </div>
-      </div>
-    </div>
+
+        <DialogFooter>
+          <Button type="button" variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={() => onConfirm(target)}>
+            Extend
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

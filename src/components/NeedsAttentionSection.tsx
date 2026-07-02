@@ -1,11 +1,14 @@
+import { AlertTriangle } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { attentionReasons } from '../lib/attention'
 import { relativeExpiry } from '../lib/format'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 import { Avatar } from './Avatar'
 
 // The differentiating feature: a distinct grouped section, not a buried badge.
-// Visually warm but not loud — a calm "here's what to look at" panel.
+// Warm amber (blue's complement) — noticeable but not loud.
 
 interface Props {
   transfers: Transfer[]
@@ -20,12 +23,10 @@ export function NeedsAttentionSection({ transfers, onOpen }: Props) {
   if (flagged.length === 0) return null
 
   return (
-    <section className="mb-6 rounded-xl border border-attention-border bg-attention-soft p-4">
-      <div className="mb-3 flex items-center gap-2 px-1">
-        <span className="text-attention">⚠</span>
-        <h2 className="text-sm font-semibold text-attention">
-          Needs attention · {flagged.length}
-        </h2>
+    <section className="border-attention-border bg-attention-soft mb-6 rounded-xl border p-4">
+      <div className="text-attention mb-3 flex items-center gap-2 px-1">
+        <AlertTriangle className="size-4" />
+        <h2 className="text-sm font-semibold">Needs attention · {flagged.length}</h2>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
@@ -36,23 +37,29 @@ export function NeedsAttentionSection({ transfers, onOpen }: Props) {
               key={transfer.id}
               type="button"
               onClick={() => onOpen(transfer.id)}
-              className="flex items-start gap-3 rounded-lg border border-attention-border/60 bg-surface p-3 text-left transition-shadow hover:shadow-sm"
+              className={cn(
+                'border-attention-border/60 bg-card flex items-start gap-3 rounded-lg border p-3 text-left transition-shadow hover:shadow-sm',
+                'focus-visible:ring-ring outline-none focus-visible:ring-2',
+              )}
             >
               <Avatar member={sender} size={32} />
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-ink">{transfer.title}</div>
+                <div className="text-foreground truncate text-sm font-medium">{transfer.title}</div>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {reasons.map((r) => (
-                    <span
+                    <Badge
                       key={r.kind}
-                      className="rounded-full bg-attention-soft px-2 py-0.5 text-[11px] font-medium text-attention"
+                      variant="outline"
+                      className="bg-attention-soft text-attention border-transparent text-[11px] font-medium"
                     >
                       {r.label}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </div>
-              <span className="shrink-0 text-xs text-muted">{relativeExpiry(transfer.expiresAt)}</span>
+              <span className="text-muted-foreground shrink-0 text-xs">
+                {relativeExpiry(transfer.expiresAt)}
+              </span>
             </button>
           )
         })}

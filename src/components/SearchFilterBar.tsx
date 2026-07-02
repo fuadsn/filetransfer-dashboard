@@ -1,11 +1,14 @@
+import { Search, X } from 'lucide-react'
 import type { TransferStatus } from '../types'
 import { teamMembers } from '../data/mockData'
 import { statusMeta } from '../lib/format'
 import { isFilterActive } from '../lib/filter'
 import type { UiState } from '../lib/storage'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
 
 // Stage 4. Search + combinable member/status filters with a visible "clear all".
-// Chips animate via a simple scale/opacity transition on mount — refine as needed.
 
 const STATUSES: TransferStatus[] = ['active', 'expiring', 'expired', 'disabled']
 
@@ -19,63 +22,62 @@ export function SearchFilterBar({ ui, onChange }: Props) {
 
   return (
     <div className="mb-4 space-y-3">
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2">
-        <span className="text-faint">🔍</span>
-        <input
+      <div className="relative">
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+        <Input
           value={ui.search}
           onChange={(e) => onChange({ ...ui, search: e.target.value })}
           placeholder="Search transfers, people, files…"
-          className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-faint"
+          className="pl-9"
         />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        {/* Member filter */}
         {teamMembers.map((m) => {
           const on = ui.memberId === m.id
           return (
-            <button
+            <Button
               key={m.id}
               type="button"
+              size="sm"
+              variant={on ? 'default' : 'outline'}
               onClick={() => onChange({ ...ui, memberId: on ? null : m.id })}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                on
-                  ? 'border-brand bg-brand-soft text-brand'
-                  : 'border-border bg-surface text-muted hover:bg-surface-2'
-              }`}
+              className="h-7 rounded-full px-3 text-xs"
             >
               {m.name.split(' ')[0]}
-            </button>
+            </Button>
           )
         })}
 
-        <span className="mx-1 h-4 w-px bg-border" />
+        <Separator orientation="vertical" className="mx-1 !h-4" />
 
-        {/* Status filter */}
         {STATUSES.map((s) => {
           const on = ui.status === s
           return (
-            <button
+            <Button
               key={s}
               type="button"
+              size="sm"
+              variant={on ? 'secondary' : 'outline'}
               onClick={() => onChange({ ...ui, status: on ? null : s })}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                on ? 'border-ink bg-ink text-canvas' : 'border-border bg-surface text-muted hover:bg-surface-2'
-              }`}
+              className="h-7 rounded-full px-3 text-xs"
             >
               {statusMeta(s).label}
-            </button>
+            </Button>
           )
         })}
 
         {active && (
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="ghost"
             onClick={() => onChange({ search: '', memberId: null, status: null })}
-            className="ml-1 text-xs font-medium text-brand hover:underline"
+            className="text-primary h-7 gap-1 px-2 text-xs"
           >
+            <X className="size-3" />
             Clear all
-          </button>
+          </Button>
         )}
       </div>
     </div>

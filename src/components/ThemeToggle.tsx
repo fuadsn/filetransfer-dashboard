@@ -1,3 +1,5 @@
+import { Moon, Sun } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import type { Theme } from '../lib/useTheme'
 
 interface Props {
@@ -5,18 +7,19 @@ interface Props {
   onToggle: () => void
 }
 
-// Fixed, always-available control. Sun/moon emoji keeps it dependency-free.
+// Fixed, always-available control.
 export function ThemeToggle({ theme, onToggle }: Props) {
   const isDark = theme === 'dark'
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="icon"
       onClick={onToggle}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Light mode' : 'Dark mode'}
-      className="fixed right-4 top-4 z-40 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-base shadow-sm transition-colors hover:bg-surface-2"
+      className="bg-card fixed top-4 right-4 z-40 rounded-full shadow-sm"
     >
-      {isDark ? '☀️' : '🌙'}
-    </button>
+      {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+    </Button>
   )
 }

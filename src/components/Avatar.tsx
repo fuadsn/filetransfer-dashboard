@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { Avatar as UiAvatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { cn } from '@/lib/utils'
 import type { TeamMember } from '../types'
 
 function initials(name: string): string {
@@ -14,46 +15,27 @@ interface AvatarProps {
   member: TeamMember | undefined
   size?: number
   ring?: boolean
+  className?: string
 }
 
-export function Avatar({ member, size = 32, ring = false }: AvatarProps) {
-  // If the photo can't load (e.g. offline), fall back to initials on the
-  // colored background. Instances are keyed by member at call sites, so this
-  // per-instance flag tracks one person.
-  const [failed, setFailed] = useState(false)
-
+// Domain wrapper over shadcn's Avatar: renders the member's static photo, and
+// Radix's Fallback shows initials on the colored circle while loading / on error.
+export function Avatar({ member, size = 32, ring = false, className }: AvatarProps) {
   if (!member) return null
-
-  const showPhoto = member.avatarUrl && !failed
-
   return (
-    <div
+    <UiAvatar
       title={member.name}
-      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold text-white ${
-        ring ? 'ring-2 ring-surface' : ''
-      }`}
-      style={{
-        width: size,
-        height: size,
-        backgroundColor: member.avatarColor,
-        fontSize: size * 0.4,
-      }}
+      className={cn(ring && 'ring-card ring-2', className)}
+      style={{ width: size, height: size }}
     >
-      {showPhoto ? (
-        <img
-          key={member.id}
-          src={member.avatarUrl}
-          alt={member.name}
-          width={size}
-          height={size}
-          loading="lazy"
-          onError={() => setFailed(true)}
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        initials(member.name)
-      )}
-    </div>
+      <AvatarImage src={member.avatarUrl} alt={member.name} />
+      <AvatarFallback
+        className="font-semibold text-white"
+        style={{ backgroundColor: member.avatarColor, fontSize: size * 0.4 }}
+      >
+        {initials(member.name)}
+      </AvatarFallback>
+    </UiAvatar>
   )
 }
 
@@ -68,7 +50,7 @@ export function AvatarStack({ members, max = 3 }: { members: TeamMember[]; max?:
           <Avatar key={m.id} member={m} size={24} ring />
         ))}
       </div>
-      {extra > 0 && <span className="ml-2 text-xs text-muted">+{extra}</span>}
+      {extra > 0 && <span className="text-muted-foreground ml-2 text-xs">+{extra}</span>}
     </div>
   )
 }

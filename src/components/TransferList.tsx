@@ -1,4 +1,5 @@
 import type { Transfer } from '../types'
+import { Card } from '@/components/ui/card'
 import { TransferRow } from './TransferRow'
 
 interface Props {
@@ -9,7 +10,7 @@ interface Props {
 
 export function TransferList({ transfers, onOpen, onToggleFavorite }: Props) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+    <Card className="gap-0 overflow-hidden py-0 [&>*:last-child]:border-b-0">
       {transfers.map((t) => (
         <TransferRow
           key={t.id}
@@ -18,6 +19,6 @@ export function TransferList({ transfers, onOpen, onToggleFavorite }: Props) {
           onToggleFavorite={onToggleFavorite}
         />
       ))}
-    </div>
+    </Card>
   )
 }

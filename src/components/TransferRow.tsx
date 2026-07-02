@@ -1,6 +1,9 @@
+import { Star } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { deriveStatus, formatBytes, relativeExpiry, totalSize } from '../lib/format'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Avatar, AvatarStack } from './Avatar'
 import { StatusPill } from './StatusPill'
 
@@ -19,20 +22,26 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
   const dimmed = status === 'expired' || status === 'disabled'
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onOpen(transfer.id)}
-      className={`group flex w-full items-center gap-4 border-b border-border px-5 py-4 text-left transition-colors hover:bg-surface-2 ${
-        dimmed ? 'opacity-70' : ''
-      }`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onOpen(transfer.id)
+        }
+      }}
+      className={cn(
+        'group hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer items-center gap-4 border-b px-5 py-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset',
+        dimmed && 'opacity-70',
+      )}
     >
       <Avatar member={sender} size={40} />
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="truncate font-medium text-ink">{transfer.title}</span>
-        </div>
-        <div className="mt-0.5 truncate text-sm text-muted">
+        <span className="text-foreground block truncate font-medium">{transfer.title}</span>
+        <div className="text-muted-foreground mt-0.5 truncate text-sm">
           {sender?.name} · {transfer.files.length} file
           {transfer.files.length === 1 ? '' : 's'} · {formatBytes(totalSize(transfer))}
         </div>
@@ -46,23 +55,27 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
         <StatusPill status={status} />
       </div>
 
-      <div className="w-24 shrink-0 text-right text-sm text-muted">
+      <div className="text-muted-foreground w-24 shrink-0 text-right text-sm">
         {relativeExpiry(transfer.expiresAt)}
       </div>
 
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
         aria-label={transfer.favorited ? 'Unfavorite' : 'Favorite'}
         onClick={(e) => {
           e.stopPropagation()
           onToggleFavorite(transfer.id)
         }}
-        className={`shrink-0 rounded-md p-1 text-lg leading-none transition-transform hover:scale-110 ${
-          transfer.favorited ? 'text-expiring' : 'text-faint opacity-0 group-hover:opacity-100'
-        }`}
+        className={cn(
+          'size-8 shrink-0',
+          transfer.favorited
+            ? 'text-expiring hover:text-expiring'
+            : 'text-faint opacity-0 group-hover:opacity-100',
+        )}
       >
-        {transfer.favorited ? '★' : '☆'}
-      </button>
-    </button>
+        <Star className={cn('size-4', transfer.favorited && 'fill-current')} />
+      </Button>
+    </div>
   )
 }
