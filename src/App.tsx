@@ -12,6 +12,7 @@ import { ExtendExpiryModal } from './components/ExtendExpiryModal'
 import { ThemeToggle } from './components/ThemeToggle'
 import { Sidebar } from './components/Sidebar'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Toaster } from '@/components/ui/sonner'
 
 const SIDEBAR_KEY = 'tcw:sidebar'
@@ -77,15 +78,24 @@ export default function App() {
 
       <main className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center justify-end gap-2 px-4 pt-4">
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen((o) => !o)}
-            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-          >
-            <PanelRight className="size-4" />
-          </Button>
+          {loading ? (
+            <>
+              <Skeleton className="size-9 rounded-full" />
+              <Skeleton className="size-9 rounded-md" />
+            </>
+          ) : (
+            <>
+              <ThemeToggle theme={theme} onToggle={toggleTheme} />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen((o) => !o)}
+                aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+              >
+                <PanelRight className="size-4" />
+              </Button>
+            </>
+          )}
         </div>
 
         <Routes>

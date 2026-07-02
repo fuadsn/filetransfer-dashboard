@@ -55,9 +55,13 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
               </>
             )}
           </div>
-          <Button variant="ghost" size="icon" onClick={onToggle} aria-label="Collapse sidebar">
-            <PanelRightClose className="size-4" />
-          </Button>
+          {loading ? (
+            <Skeleton className="size-9 rounded-md" />
+          ) : (
+            <Button variant="ghost" size="icon" onClick={onToggle} aria-label="Collapse sidebar">
+              <PanelRightClose className="size-4" />
+            </Button>
+          )}
         </div>
 
         <Separator />
