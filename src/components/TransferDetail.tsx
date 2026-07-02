@@ -60,7 +60,7 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
               <div className="mb-2 flex items-center gap-2">
                 <StatusPill status={status} />
               </div>
-              <h1 className="text-foreground text-xl font-semibold tracking-tight">
+              <h1 className="text-foreground font-title text-xl font-semibold tracking-tight">
                 {transfer.title}
               </h1>
               <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-2 text-sm">

@@ -69,8 +69,13 @@ src/
     States.tsx           skeleton / empty / no-results
     TransferDetail.tsx   detail screen + actions
     ExtendExpiryModal.tsx
-  App.tsx                view routing (dashboard | detail) + overlays (toasts via sonner)
+  App.tsx                URL routes ("/" · "/transfers/:id") + overlays (toasts via sonner)
 ```
+
+Routing uses **react-router** — the dashboard is `/` and every transfer has its
+own URL at `/transfers/:id` (deep-linkable; unknown ids redirect home). Type is
+mono-forward with **Montserrat** (`font-title`) for transfer titles + headings
+and Inter for prose.
 
 ## Build order / status
 

@@ -101,10 +101,12 @@
 
 /* Map tokens → Tailwind utilities (bg-primary, text-muted-foreground, …). */
 @theme inline {
-  /* Mono-forward type system. font-mono is the default; font-sans for prose. */
+  /* Type system: mono is the default body face; sans for prose; Montserrat
+     (font-title) for display — transfer titles and page headings. */
   --font-mono:
     'JetBrains Mono Variable', ui-monospace, 'SF Mono', 'Menlo', monospace;
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-title: 'Montserrat Variable', 'Inter Variable', ui-sans-serif, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

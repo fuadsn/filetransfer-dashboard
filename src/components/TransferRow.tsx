@@ -40,7 +40,9 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
       <Avatar member={sender} size={40} />
 
       <div className="min-w-0 flex-1">
-        <span className="text-foreground block truncate font-medium">{transfer.title}</span>
+        <span className="text-foreground font-title block truncate font-semibold">
+          {transfer.title}
+        </span>
         <div className="text-muted-foreground mt-0.5 truncate text-sm">
           {sender?.name} · {transfer.files.length} file
           {transfer.files.length === 1 ? '' : 's'} · {formatBytes(totalSize(transfer))}

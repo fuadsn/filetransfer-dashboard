@@ -44,7 +44,9 @@ export function NeedsAttentionSection({ transfers, onOpen }: Props) {
             >
               <Avatar member={sender} size={32} />
               <div className="min-w-0 flex-1">
-                <div className="text-foreground truncate text-sm font-medium">{transfer.title}</div>
+                <div className="text-foreground font-title truncate text-sm font-semibold">
+                  {transfer.title}
+                </div>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {reasons.map((r) => (
                     <Badge
