@@ -45,15 +45,16 @@
   /* domain: tertiary text */
   --faint: #93a1bd;
 
-  /* domain: transfer status (fg + soft bg) */
-  --active: #16a34a;
-  --active-soft: #e7f6ec;
-  --expiring: #b45309;
-  --expiring-soft: #fdf1e0;
-  --expired: #64748b;
-  --expired-soft: #eef1f6;
-  --disabled: #dc2626;
-  --disabled-soft: #fdecec;
+  /* domain: transfer status (fg + soft bg). Darker fg in light mode so pills
+     read with weight against their soft backgrounds. */
+  --active: #15803d;
+  --active-soft: #dcf1e3;
+  --expiring: #92400e;
+  --expiring-soft: #fbe8d3;
+  --expired: #475569;
+  --expired-soft: #e7ebf1;
+  --disabled: #b91c1c;
+  --disabled-soft: #fbe1e1;
 
   /* domain: needs-attention (amber — blue's complement) */
   --attention: #b45309;
