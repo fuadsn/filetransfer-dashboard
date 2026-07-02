@@ -57,7 +57,7 @@ export function NeedsAttentionSection({ transfers, onOpen }: Props) {
                   ))}
                 </div>
               </div>
-              <span className="text-muted-foreground shrink-0 text-xs">
+              <span className="text-muted-foreground shrink-0 text-xs whitespace-nowrap">
                 {relativeExpiry(transfer.expiresAt)}
               </span>
             </button>

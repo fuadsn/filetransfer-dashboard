@@ -55,7 +55,7 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
         <StatusPill status={status} />
       </div>
 
-      <div className="text-muted-foreground w-24 shrink-0 text-right text-sm">
+      <div className="text-muted-foreground w-28 shrink-0 text-right text-sm whitespace-nowrap">
         {relativeExpiry(transfer.expiresAt)}
       </div>
 

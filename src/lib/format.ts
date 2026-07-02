@@ -30,13 +30,13 @@ interface StatusMeta {
 export function statusMeta(status: TransferStatus): StatusMeta {
   switch (status) {
     case 'active':
-      return { label: 'Active', fg: 'text-active', bg: 'bg-active-soft', border: 'border-active/40', live: true }
+      return { label: 'Active', fg: 'text-active', bg: 'bg-active-soft', border: 'border-active/20', live: true }
     case 'expiring':
-      return { label: 'Expiring soon', fg: 'text-expiring', bg: 'bg-expiring-soft', border: 'border-expiring/50', live: true }
+      return { label: 'Expiring soon', fg: 'text-expiring', bg: 'bg-expiring-soft', border: 'border-expiring/25', live: true }
     case 'expired':
-      return { label: 'Expired', fg: 'text-expired', bg: 'bg-expired-soft', border: 'border-expired/40', live: false }
+      return { label: 'Expired', fg: 'text-expired', bg: 'bg-expired-soft', border: 'border-expired/20', live: false }
     case 'disabled':
-      return { label: 'Disabled', fg: 'text-disabled', bg: 'bg-disabled-soft', border: 'border-disabled/40', live: false }
+      return { label: 'Disabled', fg: 'text-disabled', bg: 'bg-disabled-soft', border: 'border-disabled/20', live: false }
   }
 }
 
