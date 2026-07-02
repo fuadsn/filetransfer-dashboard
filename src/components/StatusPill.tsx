@@ -16,9 +16,10 @@ export function StatusPill({ status }: { status: TransferStatus }) {
         border,
       )}
     >
-      {/* dot stays solid (the indicator); label is lightened to read softer */}
+      {/* dot stays solid (the indicator); label is full-strength in light mode
+          to pop, softened only in dark */}
       <span className={cn('inline-flex size-1.5 shrink-0 rounded-full bg-current', dot)} />
-      <span className="opacity-70">{label}</span>
+      <span className="dark:opacity-70">{label}</span>
     </Badge>
   )
 }
