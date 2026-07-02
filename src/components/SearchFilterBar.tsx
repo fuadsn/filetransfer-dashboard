@@ -131,12 +131,14 @@ export function SearchFilterBar({ ui, onChange }: Props) {
               aria-pressed={on}
               onClick={() => onChange({ ...ui, status: on ? null : s })}
               className={cn(
-                'inline-flex items-center gap-1.5 rounded border border-transparent px-2 py-1 text-[11px] font-medium transition-all outline-none',
+                'inline-flex cursor-pointer items-center gap-1.5 rounded border border-transparent px-2 py-1 text-[11px] font-medium transition-all outline-none',
                 meta.bg,
                 meta.fg,
+                // full-strength at rest; selected gets a ring, unselected a
+                // subtle hover ring for affordance (no opacity dimming)
                 on
                   ? 'ring-primary ring-offset-background ring-2 ring-offset-1'
-                  : 'opacity-50 hover:opacity-100',
+                  : 'hover:ring-border hover:ring-1',
                 'focus-visible:ring-primary focus-visible:ring-2',
               )}
             >
