@@ -4,22 +4,22 @@ import type { TransferStatus } from '../types'
 import { statusMeta } from '../lib/format'
 
 export function StatusPill({ status }: { status: TransferStatus }) {
-  const { label, fg, bg, border, dot } = statusMeta(status)
+  const { label, fg, bg, dot } = statusMeta(status)
   return (
     <Badge
       variant="outline"
       className={cn(
-        'gap-1.5 rounded-md border px-2.5 py-0.5 text-[11px] font-semibold capitalize',
-        // text, dot (bg-current) and border all share the status color
+        // Notion-tag look: borderless soft-tint fill, tight radius, medium weight.
+        'gap-1.5 rounded border-transparent px-2 py-0.5 text-[11px] font-medium',
+        // text + dot (bg-current) share the status color; the fill is its soft tint
         fg,
         bg,
-        border,
       )}
     >
-      {/* dot stays solid (the indicator); label is full-strength in light mode
-          to pop, softened only in dark */}
+      {/* dot stays solid (the live indicator); label is full-strength in light
+          mode to pop, softened only in dark */}
       <span className={cn('inline-flex size-1.5 shrink-0 rounded-full bg-current', dot)} />
-      <span className="dark:opacity-70">{label}</span>
+      <span className="dark:opacity-80">{label}</span>
     </Badge>
   )
 }
