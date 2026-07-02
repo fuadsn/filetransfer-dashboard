@@ -65,33 +65,32 @@
 }
 
 .dark {
-  /* Earthy palette — proportions follow the source swatches:
-     #1B211A (most) → surfaces · #628141 (2nd) → borders/fills ·
-     #8BAE66 (3rd) → primary/ring · #EBD5AB (least) → text. */
-  --background: #1b211a;
-  --foreground: #ebd5ab;
-  /* lift surfaces clearly off the near-black background so cards/dialogs read
-     as elevated layers */
-  --card: #232c20;
-  --card-foreground: #ebd5ab;
-  --popover: #232c20;
-  --popover-foreground: #ebd5ab;
+  /* Muted purple-gray palette:
+     #37353E → background · #44444E → cards/fills · #715A5A → primary/accent
+     (the one warm hue) · #D3DAD9 → text. */
+  --background: #37353e;
+  --foreground: #d3dad9;
+  /* lift surfaces clearly off the background so cards/dialogs read as layers */
+  --card: #44444e;
+  --card-foreground: #d3dad9;
+  --popover: #44444e;
+  --popover-foreground: #d3dad9;
 
-  --primary: #8bae66;
-  --primary-foreground: #1b211a;
-  --secondary: #33402a;
-  --secondary-foreground: #ebd5ab;
-  --muted: #2b3524;
-  --muted-foreground: #b0bd96;
-  --accent: #3a4a2b;
-  --accent-foreground: #ebd5ab;
-  --destructive: #e08a6a;
+  --primary: #715a5a;
+  --primary-foreground: #f2f4f3;
+  --secondary: #4f4e59;
+  --secondary-foreground: #d3dad9;
+  --muted: #4f4e59;
+  --muted-foreground: #b3b2bd;
+  --accent: #574c53;
+  --accent-foreground: #d3dad9;
+  --destructive: #d98079;
 
-  --border: #44532f;
-  --input: #44532f;
-  --ring: #8bae66;
+  --border: #55535f;
+  --input: #55535f;
+  --ring: #8b7070;
 
-  --faint: #85926a;
+  --faint: #86848f;
 
   --active: #34d399;
   --active-soft: #0f2a20;
