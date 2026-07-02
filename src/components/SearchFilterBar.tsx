@@ -8,6 +8,7 @@ import type { UiState } from '../lib/storage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 
 // Stage 4. Search + combinable member/status filters with a visible "clear all".
 
@@ -103,17 +104,22 @@ export function SearchFilterBar({ ui, onChange }: Props) {
 
         {STATUSES.map((s) => {
           const on = ui.status === s
+          const meta = statusMeta(s)
+          // Selected → the status-pill look; unselected → neutral chip with the
+          // status-colored dot, so the color always ties back to the pills.
           return (
-            <Button
+            <button
               key={s}
               type="button"
-              size="sm"
-              variant={on ? 'secondary' : 'outline'}
               onClick={() => onChange({ ...ui, status: on ? null : s })}
-              className="h-7 rounded-full px-3 text-xs"
+              className={cn(
+                'inline-flex h-7 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors',
+                on ? cn(meta.bg, meta.border) : 'border-border hover:bg-muted',
+              )}
             >
-              {statusMeta(s).label}
-            </Button>
+              <span className={cn('size-1.5 shrink-0 rounded-full bg-current', meta.fg)} />
+              <span className={on ? meta.fg : 'text-muted-foreground'}>{meta.label}</span>
+            </button>
           )
         })}
 
