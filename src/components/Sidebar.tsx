@@ -1,8 +1,9 @@
 import { Fragment } from 'react'
-import { AlertTriangle, PanelRightClose, Star } from 'lucide-react'
+import { AlertTriangle, PanelRightClose, ShieldAlert, Star } from 'lucide-react'
 import type { Transfer } from '../types'
-import { memberById } from '../data/mockData'
+import type { AttentionReason } from '../lib/attention'
 import { attentionReasons } from '../lib/attention'
+import { memberById } from '../data/mockData'
 import { expiryLabel } from '../lib/format'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -19,25 +20,25 @@ interface Props {
   onOpen: (id: string) => void
 }
 
-// Collapsible left sidebar: brand + the "Needs attention" panel. Inline on
-// large screens (width collapses), an overlay drawer on small ones.
-// A post-disable access attempt is a security red flag — it outranks any
-// time-based urgency.
-const isCritical = (reasons: ReturnType<typeof attentionReasons>) =>
+interface Flagged {
+  transfer: Transfer
+  reasons: AttentionReason[]
+}
+
+// A post-disable access attempt is a security red flag — its own section,
+// above the ordinary time-based warnings.
+const isCritical = (reasons: AttentionReason[]) =>
   reasons.some((r) => r.kind === 'denied_after_disable')
 
+const bySoonestExpiry = (a: Flagged, b: Flagged) => a.transfer.expiresAt - b.transfer.expiresAt
+
 export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
-  const flagged = transfers
+  const flagged: Flagged[] = transfers
     .map((t) => ({ transfer: t, reasons: attentionReasons(t) }))
     .filter((x) => x.reasons.length > 0)
-    // Critical (security) first, then most-imminent expiry — an attention feed
-    // surfaces the biggest emergencies at the top.
-    .sort((a, b) => {
-      const ca = isCritical(a.reasons) ? 0 : 1
-      const cb = isCritical(b.reasons) ? 0 : 1
-      if (ca !== cb) return ca - cb
-      return a.transfer.expiresAt - b.transfer.expiresAt
-    })
+
+  const critical = flagged.filter((x) => isCritical(x.reasons)).sort(bySoonestExpiry)
+  const attention = flagged.filter((x) => !isCritical(x.reasons)).sort(bySoonestExpiry)
 
   return (
     <aside
@@ -79,96 +80,131 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
 
         <Separator />
 
-        {/* Section header — its own banded compartment, divided from the list */}
-        <div className="flex items-center gap-2 border-b px-4 py-3">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {loading ? (
             <>
-              <Skeleton className="size-4 shrink-0 rounded" />
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="ml-auto h-5 w-6 rounded-full" />
+              <SectionHeaderSkeleton />
+              <div className="p-3">
+                <AttentionSkeleton />
+              </div>
             </>
           ) : (
             <>
-              <AlertTriangle className="text-attention size-4 shrink-0" />
-              <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
-              <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
-                {flagged.length}
-              </span>
-            </>
-          )}
-        </div>
+              {/* Security — critical, red scheme, pinned above */}
+              {critical.length > 0 && (
+                <section>
+                  <div className="bg-destructive/10 border-destructive/20 flex items-center gap-2 border-b px-4 py-3">
+                    <ShieldAlert className="text-destructive size-4 shrink-0" />
+                    <h2 className="text-foreground text-sm font-semibold">Security</h2>
+                    <span className="bg-destructive/15 text-destructive ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
+                      {critical.length}
+                    </span>
+                  </div>
+                  <div className="divide-border divide-y">
+                    {critical.map((f) => (
+                      <AttentionItem key={f.transfer.id} flagged={f} onOpen={onOpen} />
+                    ))}
+                  </div>
+                </section>
+              )}
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-3">
-          {loading ? (
-            <AttentionSkeleton />
-          ) : flagged.length === 0 ? (
-            <p className="text-muted-foreground px-1 pt-1 text-sm">
-              Nothing needs attention right now — you're all caught up.
-            </p>
-          ) : (
-            <div className="divide-border divide-y">
-              {flagged.map(({ transfer, reasons }) => {
-                const sender = memberById(transfer.senderId)
-                const expiry = expiryLabel(transfer)
-                const critical = isCritical(reasons)
-                return (
-                  <button
-                    key={transfer.id}
-                    type="button"
-                    onClick={() => onOpen(transfer.id)}
-                    className={cn(
-                      'hover:bg-muted focus-visible:ring-ring block w-full border-l-2 px-2.5 py-3 text-left transition-colors outline-none focus-visible:ring-2',
-                      // critical (security) rows carry a red accent bar
-                      critical ? 'border-destructive' : 'border-transparent',
-                    )}
-                  >
-                    <div className="flex items-start gap-2.5">
-                      {/* avatar + carried-over star (favorited context) */}
-                      <div className="flex shrink-0 flex-col items-center gap-1">
-                        <Avatar member={sender} size={26} />
-                        {transfer.favorited && (
-                          <Star className="text-expiring size-3 fill-current" aria-label="Starred" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-foreground font-title truncate text-sm font-medium">
-                          {transfer.title}
-                        </div>
-                        {/* date + reasons share a line when they fit; the whole
-                            reason group drops to its own line rather than
-                            breaking mid-group. Date muted; critical reason red. */}
-                        <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
-                          {expiry !== '—' && (
-                            <span className="text-muted-foreground whitespace-nowrap">{expiry}</span>
-                          )}
-                          {reasons.length > 0 && (
-                            <span>
-                              {reasons.map((r, i) => (
-                                <Fragment key={r.kind}>
-                                  {i > 0 && <span className="text-faint"> · </span>}
-                                  <span
-                                    className={cn(
-                                      r.kind === 'denied_after_disable'
-                                        ? 'text-destructive font-semibold'
-                                        : 'text-attention',
-                                    )}
-                                  >
-                                    {r.label}
-                                  </span>
-                                </Fragment>
-                              ))}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
+              {/* Needs attention — time-based warnings, amber */}
+              {attention.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 border-b px-4 py-3">
+                    <AlertTriangle className="text-attention size-4 shrink-0" />
+                    <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
+                    <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
+                      {attention.length}
+                    </span>
+                  </div>
+                  <div className="divide-border divide-y">
+                    {attention.map((f) => (
+                      <AttentionItem key={f.transfer.id} flagged={f} onOpen={onOpen} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {flagged.length === 0 && (
+                <>
+                  <div className="flex items-center gap-2 border-b px-4 py-3">
+                    <AlertTriangle className="text-attention size-4 shrink-0" />
+                    <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
+                    <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
+                      0
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground p-4 text-sm">
+                    Nothing needs attention right now — you're all caught up.
+                  </p>
+                </>
+              )}
+            </>
           )}
         </div>
       </div>
     </aside>
+  )
+}
+
+function AttentionItem({ flagged, onOpen }: { flagged: Flagged; onOpen: (id: string) => void }) {
+  const { transfer, reasons } = flagged
+  const sender = memberById(transfer.senderId)
+  const expiry = expiryLabel(transfer)
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(transfer.id)}
+      className="hover:bg-muted focus-visible:ring-ring block w-full px-4 py-3 text-left transition-colors outline-none focus-visible:ring-2"
+    >
+      <div className="flex items-start gap-2.5">
+        {/* avatar + carried-over star (favorited context) */}
+        <div className="flex shrink-0 flex-col items-center gap-1">
+          <Avatar member={sender} size={26} />
+          {transfer.favorited && (
+            <Star className="text-expiring size-3 fill-current" aria-label="Starred" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-foreground font-title truncate text-sm font-medium">
+            {transfer.title}
+          </div>
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
+            {expiry !== '—' && (
+              <span className="text-muted-foreground whitespace-nowrap">{expiry}</span>
+            )}
+            {reasons.length > 0 && (
+              <span>
+                {reasons.map((r, i) => (
+                  <Fragment key={r.kind}>
+                    {i > 0 && <span className="text-faint"> · </span>}
+                    <span
+                      className={
+                        r.kind === 'denied_after_disable'
+                          ? 'text-destructive font-semibold'
+                          : 'text-attention'
+                      }
+                    >
+                      {r.label}
+                    </span>
+                  </Fragment>
+                ))}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </button>
+  )
+}
+
+function SectionHeaderSkeleton() {
+  return (
+    <div className="flex items-center gap-2 border-b px-4 py-3">
+      <Skeleton className="size-4 shrink-0 rounded" />
+      <Skeleton className="h-4 w-28" />
+      <Skeleton className="ml-auto h-5 w-6 rounded-full" />
+    </div>
   )
 }
