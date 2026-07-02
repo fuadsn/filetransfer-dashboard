@@ -120,6 +120,7 @@ export default function App() {
       <Sidebar
         transfers={transfers}
         open={sidebarOpen}
+        loading={loading}
         onToggle={() => setSidebarOpen((o) => !o)}
         onOpen={openTransfer}
       />

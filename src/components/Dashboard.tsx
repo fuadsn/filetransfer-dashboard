@@ -4,7 +4,7 @@ import { deriveStatus } from '../lib/format'
 import { filterTransfers } from '../lib/filter'
 import type { UiState } from '../lib/storage'
 import { SearchFilterBar } from './SearchFilterBar'
-import { EmptyState, NoResultsState, SkeletonRows } from './States'
+import { EmptyState, NoResultsState, SearchSkeleton, SkeletonRows } from './States'
 import { TransferList } from './TransferList'
 
 interface Props {
@@ -35,9 +35,12 @@ export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite,
   }, [transfers, ui])
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pt-4 pb-8">
+    <div className="mx-auto w-full max-w-5xl px-4 pt-4 pb-8">
       {loading ? (
-        <SkeletonRows />
+        <>
+          <SearchSkeleton />
+          <SkeletonRows />
+        </>
       ) : transfers.length === 0 ? (
         <EmptyState />
       ) : (

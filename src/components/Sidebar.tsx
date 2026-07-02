@@ -1,24 +1,27 @@
+import { Fragment } from 'react'
 import { AlertTriangle, PanelRightClose } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { attentionReasons } from '../lib/attention'
 import { expiryLabel } from '../lib/format'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { Avatar } from './Avatar'
+import { AttentionSkeleton } from './States'
 
 interface Props {
   transfers: Transfer[]
   open: boolean
+  loading: boolean
   onToggle: () => void
   onOpen: (id: string) => void
 }
 
 // Collapsible left sidebar: brand + the "Needs attention" panel. Inline on
 // large screens (width collapses), an overlay drawer on small ones.
-export function Sidebar({ transfers, open, onToggle, onOpen }: Props) {
+export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
   const flagged = transfers
     .map((t) => ({ transfer: t, reasons: attentionReasons(t) }))
     .filter((x) => x.reasons.length > 0)
@@ -50,46 +53,61 @@ export function Sidebar({ transfers, open, onToggle, onOpen }: Props) {
 
         <Separator />
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <div className="text-attention mb-3 flex items-center gap-2">
-            <AlertTriangle className="size-4" />
-            <h2 className="text-sm font-semibold">Needs attention · {flagged.length}</h2>
-          </div>
+        {/* Section header — its own banded compartment, divided from the list */}
+        <div className="flex items-center gap-2 border-b px-4 py-3">
+          <AlertTriangle className="text-attention size-4 shrink-0" />
+          <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
+          {loading ? (
+            <Skeleton className="ml-auto h-5 w-6 rounded-full" />
+          ) : (
+            <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
+              {flagged.length}
+            </span>
+          )}
+        </div>
 
-          {flagged.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+        <div className="min-h-0 flex-1 overflow-y-auto p-3">
+          {loading ? (
+            <AttentionSkeleton />
+          ) : flagged.length === 0 ? (
+            <p className="text-muted-foreground px-1 pt-1 text-sm">
               Nothing needs attention right now — you're all caught up.
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="divide-border divide-y">
               {flagged.map(({ transfer, reasons }) => {
                 const sender = memberById(transfer.senderId)
+                const expiry = expiryLabel(transfer)
                 return (
                   <button
                     key={transfer.id}
                     type="button"
                     onClick={() => onOpen(transfer.id)}
-                    className="border-attention-border/60 bg-attention-soft/40 hover:bg-attention-soft focus-visible:ring-ring block w-full rounded-lg border p-3 text-left transition-colors outline-none focus-visible:ring-2"
+                    className="hover:bg-muted focus-visible:ring-ring block w-full px-2.5 py-3 text-left transition-colors outline-none focus-visible:ring-2"
                   >
-                    <div className="flex items-start gap-2">
-                      <Avatar member={sender} size={28} />
+                    <div className="flex items-start gap-2.5">
+                      <Avatar member={sender} size={26} />
                       <div className="min-w-0 flex-1">
-                        <div className="text-foreground font-title truncate text-sm font-semibold">
+                        <div className="text-foreground font-title truncate text-sm font-medium">
                           {transfer.title}
                         </div>
-                        <div className="text-muted-foreground mt-0.5 text-xs">
-                          {expiryLabel(transfer)}
-                        </div>
-                        <div className="mt-1.5 flex flex-wrap gap-1">
-                          {reasons.map((r) => (
-                            <Badge
-                              key={r.kind}
-                              variant="outline"
-                              className="bg-attention-soft text-attention border-transparent text-[10px]"
-                            >
-                              {r.label}
-                            </Badge>
-                          ))}
+                        {/* date + reasons share a line when they fit; the whole
+                            reason group drops to its own line rather than
+                            breaking mid-group. Date muted, reasons amber. */}
+                        <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
+                          {expiry !== '—' && (
+                            <span className="text-muted-foreground whitespace-nowrap">{expiry}</span>
+                          )}
+                          {reasons.length > 0 && (
+                            <span className="text-attention">
+                              {reasons.map((r, i) => (
+                                <Fragment key={r.kind}>
+                                  {i > 0 && <span className="text-faint"> · </span>}
+                                  {r.label}
+                                </Fragment>
+                              ))}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
