@@ -99,11 +99,11 @@
   --active-soft: #3b473c;
   --expiring: #d8be86;
   --expiring-soft: #494233;
-  --expired: #b6b3c1;
-  --expired-soft: #46454f;
+  --expired: #cac8d3;
+  --expired-soft: #363642;
   /* disabled = dusty rose in the mauve family, clear of the --destructive red */
-  --disabled: #cfa5a4;
-  --disabled-soft: #4c3f42;
+  --disabled: #ddb1b0;
+  --disabled-soft: #503c3f;
 
   --attention: #dcc084;
   --attention-soft: #443d2e;
