@@ -46,7 +46,7 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
   const activity = [...transfer.activity].sort((a, b) => b.timestamp - a.timestamp)
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="mx-auto max-w-5xl px-4 py-6">
       <Button variant="ghost" size="sm" onClick={onBack} className="text-muted-foreground mb-4">
         <ArrowLeft className="size-4" />
         Back to dashboard
