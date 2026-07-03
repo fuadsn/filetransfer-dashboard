@@ -1,7 +1,9 @@
+import { motion } from 'motion/react'
 import { Link2Off, Star } from 'lucide-react'
 import type { Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { deriveStatus, expiryLabel, formatBytes, totalSize } from '../lib/format'
+import { useFavoritePop } from '../lib/useFavoritePop'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarStack } from './Avatar'
@@ -19,6 +21,9 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
   const recipients = transfer.recipientIds.map(memberById).filter(Boolean) as NonNullable<
     ReturnType<typeof memberById>
   >[]
+
+  // Subtle Instagram-like pop when the row becomes favorited.
+  const starControls = useFavoritePop(transfer.favorited)
 
   return (
     <div
@@ -53,19 +58,33 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
           {sender?.name} · {transfer.files.length} file
           {transfer.files.length === 1 ? '' : 's'} · {formatBytes(totalSize(transfer))}
         </div>
+        {/* Mobile: status + expiry stack under the title, since the right-side
+            columns are hidden below sm to avoid clipping on narrow screens. */}
+        <div className="mt-2 flex items-center gap-2 sm:hidden">
+          <StatusPill status={status} />
+          <span
+            className={cn(
+              'text-xs whitespace-nowrap',
+              status === 'expiring' ? 'text-expiring font-medium' : 'text-muted-foreground',
+            )}
+          >
+            {expiryLabel(transfer)}
+          </span>
+        </div>
       </div>
 
-      <div className="hidden w-28 shrink-0 sm:block">
+      {/* Recipients only on wide screens (least-critical column) */}
+      <div className="hidden w-28 shrink-0 lg:block">
         <AvatarStack members={recipients} />
       </div>
 
-      <div className="w-32 shrink-0">
+      <div className="hidden w-32 shrink-0 sm:block">
         <StatusPill status={status} />
       </div>
 
       <div
         className={cn(
-          'w-28 shrink-0 text-right text-sm whitespace-nowrap',
+          'hidden w-28 shrink-0 text-right text-sm whitespace-nowrap sm:block',
           // urgency carries into the countdown so it scans instantly
           status === 'expiring' ? 'text-expiring font-medium' : 'text-muted-foreground',
         )}
@@ -88,7 +107,9 @@ export function TransferRow({ transfer, onOpen, onToggleFavorite }: TransferRowP
           transfer.favorited ? 'text-expiring hover:text-expiring' : 'text-faint hover:text-foreground',
         )}
       >
-        <Star className={cn('size-4', transfer.favorited && 'fill-current')} />
+        <motion.span animate={starControls} className="inline-flex">
+          <Star className={cn('size-4', transfer.favorited && 'fill-current')} />
+        </motion.span>
       </Button>
     </div>
   )

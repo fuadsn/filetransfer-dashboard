@@ -1,7 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import type { Transfer } from '../types'
 import { deriveStatus } from '../lib/format'
 import { filterTransfers } from '../lib/filter'
+import { useScrollUpOnShrink } from '../lib/useScrollUpOnShrink'
 import type { UiState } from '../lib/storage'
 import { SearchFilterBar } from './SearchFilterBar'
 import { EmptyState, NoResultsState, SearchSkeleton, SkeletonRows } from './States'
@@ -38,8 +39,14 @@ export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite,
     })
   }, [transfers, ui])
 
+  // When a filter shrinks the list while scrolled down, ease the page up to the
+  // top instead of letting the browser snap it (see hook). overflow-anchor:none
+  // on the container stops the browser from fighting the collapse meanwhile.
+  const contentRef = useRef<HTMLDivElement>(null)
+  useScrollUpOnShrink(filtered.length, contentRef)
+
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 pt-4 pb-8">
+    <div ref={contentRef} className="mx-auto w-full max-w-5xl px-4 pt-4 pb-8 [overflow-anchor:none]">
       {loading ? (
         <>
           <SearchSkeleton />
@@ -55,7 +62,7 @@ export function Dashboard({ transfers, ui, onUiChange, onOpen, onToggleFavorite,
             <NoResultsState
               query={ui.search}
               onClear={() =>
-                onUiChange({ search: '', memberId: null, status: null, favoritesOnly: false })
+                onUiChange({ search: '', memberIds: [], statuses: [], favoritesOnly: false })
               }
             />
           ) : (
