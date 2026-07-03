@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { MotionConfig } from 'motion/react'
 import { PanelRight } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Transfer } from './types'
@@ -38,6 +39,18 @@ export default function App() {
     }
   }, [sidebarOpen])
 
+  // ⌘/Ctrl-B toggles the sidebar from anywhere.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.key === 'b' || e.key === 'B') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setSidebarOpen((o) => !o)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   // Persisted search/filter state.
   const [ui, setUi] = useState<UiState>(() => loadUiState())
   useEffect(() => saveUiState(ui), [ui])
@@ -66,6 +79,7 @@ export default function App() {
   }
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="flex min-h-screen">
       {/* Mobile backdrop */}
       {sidebarOpen && (
@@ -149,6 +163,7 @@ export default function App() {
 
       <Toaster />
     </div>
+    </MotionConfig>
   )
 }
 

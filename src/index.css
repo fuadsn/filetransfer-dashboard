@@ -193,6 +193,64 @@
   }
 }
 
+/* Theme switch — circular reveal (View Transitions API). Disable the default
+   cross-fade so the incoming theme is revealed purely by the expanding clip
+   circle (animated from the bottom-center in useTheme), painted over the old. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 0;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* Theme toggle icon — sun ⇆ moon morph (adapted from web.dev's animated
+   dark-mode toggle). Keyed off `.dark` on <html>: light shows the sun with
+   rays; dark grows the disc, slides a masked circle across to carve the
+   crescent, and retracts the rays. */
+.sun-and-moon > :is(.sun, .sun-beams) {
+  transform-origin: center;
+}
+.sun-and-moon > .sun {
+  transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
+}
+.sun-and-moon > .sun-beams {
+  transition:
+    transform 0.5s cubic-bezier(0.5, 1.5, 0.75, 1.25),
+    opacity 0.5s cubic-bezier(0.25, 0, 0.3, 1);
+}
+.sun-and-moon > .moon > circle {
+  transition: transform 0.25s cubic-bezier(0, 0, 0, 1);
+}
+
+.dark .sun-and-moon > .sun {
+  transform: scale(1.75);
+  transition-timing-function: cubic-bezier(0.25, 0, 0.3, 1);
+  transition-duration: 0.25s;
+}
+.dark .sun-and-moon > .sun-beams {
+  transform: rotateZ(-25deg);
+  opacity: 0;
+  transition-duration: 0.15s;
+}
+.dark .sun-and-moon > .moon > circle {
+  transform: translateX(-7px);
+  transition-delay: 0.25s;
+  transition-duration: 0.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sun-and-moon > .sun,
+  .sun-and-moon > .sun-beams,
+  .sun-and-moon > .moon > circle {
+    transition: none;
+  }
+}
+
 html,
 body,
 #root {
@@ -216,8 +274,8 @@ html.dark {
     letter-spacing: -0.01em;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
+    /* No color transition here: the theme switch is animated by the View
+       Transition circular reveal (see useTheme), and a body transition would
+       make its snapshot capture a mid-fade background. */
   }
 }
