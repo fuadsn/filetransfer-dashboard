@@ -27,7 +27,12 @@ interface Props {
   onChange: (next: UiState) => void
 }
 
-const CLEARED: UiState = { search: '', memberId: null, status: null, favoritesOnly: false }
+const CLEARED: UiState = { search: '', memberIds: [], statuses: [], favoritesOnly: false }
+
+// Multi-select toggle: add the value if absent, remove it if present.
+function toggle<T>(list: T[], value: T): T[] {
+  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
+}
 
 export function SearchFilterBar({ ui, onChange }: Props) {
   const active = isFilterActive(ui)
@@ -93,7 +98,13 @@ export function SearchFilterBar({ ui, onChange }: Props) {
           size="sm"
           variant={ui.favoritesOnly ? 'default' : 'outline'}
           onClick={() => onChange({ ...ui, favoritesOnly: !ui.favoritesOnly })}
-          className="h-7 gap-1.5 rounded-full px-3 text-xs"
+          // The selected (default) variant has no border while unselected
+          // (outline) does — reserve a transparent border so the width never
+          // shifts. active:scale gives a tactile button-press feel.
+          className={cn(
+            'h-7 gap-1.5 rounded-full px-3 text-xs transition-transform active:scale-95',
+            ui.favoritesOnly && 'border border-transparent',
+          )}
         >
           <Star className={cn('size-3.5', ui.favoritesOnly && 'fill-current')} />
           Starred
@@ -103,15 +114,19 @@ export function SearchFilterBar({ ui, onChange }: Props) {
 
         {/* Member filter */}
         {teamMembers.map((m) => {
-          const on = ui.memberId === m.id
+          const on = ui.memberIds.includes(m.id)
           return (
             <Button
               key={m.id}
               type="button"
               size="sm"
               variant={on ? 'default' : 'outline'}
-              onClick={() => onChange({ ...ui, memberId: on ? null : m.id })}
-              className="h-7 rounded-full px-3 text-xs"
+              aria-pressed={on}
+              onClick={() => onChange({ ...ui, memberIds: toggle(ui.memberIds, m.id) })}
+              className={cn(
+                'h-7 rounded-full px-3 text-xs transition-transform active:scale-95',
+                on && 'border border-transparent',
+              )}
             >
               {m.name.split(' ')[0]}
             </Button>
@@ -122,28 +137,34 @@ export function SearchFilterBar({ ui, onChange }: Props) {
 
         {/* Status filter — same pill language as the table; selected = ringed */}
         {STATUSES.map((s) => {
-          const on = ui.status === s
+          const on = ui.statuses.includes(s)
           const meta = statusMeta(s)
           return (
             <button
               key={s}
               type="button"
               aria-pressed={on}
-              onClick={() => onChange({ ...ui, status: on ? null : s })}
-              className={cn(
-                'inline-flex cursor-pointer items-center gap-1.5 rounded border border-transparent px-2 py-1 text-[11px] font-medium transition-all outline-none',
-                meta.bg,
-                meta.fg,
-                // full-strength at rest; selected gets a ring, unselected a
-                // subtle hover ring for affordance (no opacity dimming)
-                on
-                  ? 'ring-primary ring-offset-background ring-2 ring-offset-1'
-                  : 'hover:ring-border hover:ring-1',
-                'focus-visible:ring-primary focus-visible:ring-2',
-              )}
+              onClick={() => onChange({ ...ui, statuses: toggle(ui.statuses, s) })}
+              // Outer button is a transparent, padded hit area — it enlarges the
+              // clickable box without growing the visible pill inside it.
+              className="focus-visible:ring-primary group -my-0.5 cursor-pointer rounded-md px-1 py-1.5 outline-none focus-visible:ring-2"
             >
-              <span className="size-1.5 shrink-0 rounded-full bg-current" />
-              {meta.label}
+              <span
+                className={cn(
+                  // The visible pill stays compact (px-2 py-1).
+                  'inline-flex items-center gap-1.5 rounded border border-transparent px-2 py-1 text-[11px] font-medium transition-all group-active:scale-95',
+                  meta.bg,
+                  meta.fg,
+                  // selected gets a thin ring in its own status color;
+                  // unselected gets a subtle ring on hover for affordance
+                  on
+                    ? cn(meta.ring, 'ring-offset-background ring-1 ring-offset-1')
+                    : 'group-hover:ring-border group-hover:ring-1',
+                )}
+              >
+                <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                {meta.label}
+              </span>
             </button>
           )
         })}
@@ -154,7 +175,9 @@ export function SearchFilterBar({ ui, onChange }: Props) {
             size="sm"
             variant="ghost"
             onClick={() => onChange(CLEARED)}
-            className="text-primary h-7 gap-1 px-2 text-xs"
+            // ghost text style, but full-strength foreground at rest so it's
+            // clearly legible without hovering; hover adds a subtle tint
+            className="text-foreground hover:text-foreground hover:bg-muted h-7 gap-1 px-2 text-xs font-medium"
           >
             <X className="size-3" />
             Clear all

@@ -23,6 +23,8 @@ interface StatusMeta {
   fg: string
   bg: string
   border: string
+  /** Ring color (status-matched) for the selected filter-pill band. */
+  ring: string
   /** Per-status dot animation utility ('' = static). */
   dot: string
 }
@@ -30,13 +32,13 @@ interface StatusMeta {
 export function statusMeta(status: TransferStatus): StatusMeta {
   switch (status) {
     case 'active':
-      return { label: 'Active', fg: 'text-active', bg: 'bg-active-soft', border: 'border-active/20', dot: 'animate-blink-soft' }
+      return { label: 'Active', fg: 'text-active', bg: 'bg-active-soft', border: 'border-active/20', ring: 'ring-active', dot: 'animate-blink-soft' }
     case 'expiring':
-      return { label: 'Expiring soon', fg: 'text-expiring', bg: 'bg-expiring-soft', border: 'border-expiring/25', dot: 'animate-blink-fast' }
+      return { label: 'Expiring soon', fg: 'text-expiring', bg: 'bg-expiring-soft', border: 'border-expiring/25', ring: 'ring-expiring', dot: 'animate-blink-fast' }
     case 'expired':
-      return { label: 'Expired', fg: 'text-expired', bg: 'bg-expired-soft', border: 'border-expired/20', dot: '' }
+      return { label: 'Expired', fg: 'text-expired', bg: 'bg-expired-soft', border: 'border-expired/20', ring: 'ring-expired', dot: '' }
     case 'disabled':
-      return { label: 'Disabled', fg: 'text-disabled', bg: 'bg-disabled-soft', border: 'border-disabled/20', dot: 'animate-throb' }
+      return { label: 'Disabled', fg: 'text-disabled', bg: 'bg-disabled-soft', border: 'border-disabled/20', ring: 'ring-disabled', dot: 'animate-throb' }
   }
 }
 

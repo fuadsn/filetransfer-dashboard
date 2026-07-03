@@ -37,15 +37,17 @@ export function saveOverrides(overrides: OverrideMap): void {
 
 export interface UiState {
   search: string
-  memberId: string | null
-  status: string | null
+  /** Selected member ids — OR-combined, multi-select. Empty = no member filter. */
+  memberIds: string[]
+  /** Selected statuses — OR-combined, multi-select. Empty = no status filter. */
+  statuses: string[]
   favoritesOnly: boolean
 }
 
 export const defaultUiState: UiState = {
   search: '',
-  memberId: null,
-  status: null,
+  memberIds: [],
+  statuses: [],
   favoritesOnly: false,
 }
 

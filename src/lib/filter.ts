@@ -37,11 +37,15 @@ const FILE_OPTIONS = makeOptions('files', (t) => t.files.map((f) => f.name))
 // the text search.
 function matchesPills(t: Transfer, ui: UiState): boolean {
   if (ui.favoritesOnly && !t.favorited) return false
-  if (ui.memberId) {
-    const involved = t.senderId === ui.memberId || t.recipientIds.includes(ui.memberId)
+  // Within a category the pills are OR-combined (any selected member/status
+  // matches); categories AND together.
+  if (ui.memberIds.length > 0) {
+    const involved = ui.memberIds.some(
+      (id) => t.senderId === id || t.recipientIds.includes(id),
+    )
     if (!involved) return false
   }
-  if (ui.status && deriveStatus(t) !== ui.status) return false
+  if (ui.statuses.length > 0 && !ui.statuses.includes(deriveStatus(t))) return false
   return true
 }
 
@@ -55,7 +59,10 @@ let cachedIndices: { title: Fuse<Transfer>; name: Fuse<Transfer>; file: Fuse<Tra
   null
 
 function scopeKey(ui: UiState): string {
-  return `${ui.memberId ?? ''}|${ui.status ?? ''}|${ui.favoritesOnly ? 1 : 0}`
+  // Sorted so selection order doesn't cause redundant index rebuilds.
+  const members = [...ui.memberIds].sort().join(',')
+  const statuses = [...ui.statuses].sort().join(',')
+  return `${members}|${statuses}|${ui.favoritesOnly ? 1 : 0}`
 }
 
 function getIndices(scoped: Transfer[], transfers: Transfer[], key: string) {
@@ -105,6 +112,9 @@ export function filterTransfers(transfers: Transfer[], ui: UiState): Transfer[] 
 
 export function isFilterActive(ui: UiState): boolean {
   return (
-    ui.search.trim() !== '' || ui.memberId !== null || ui.status !== null || ui.favoritesOnly
+    ui.search.trim() !== '' ||
+    ui.memberIds.length > 0 ||
+    ui.statuses.length > 0 ||
+    ui.favoritesOnly
   )
 }
