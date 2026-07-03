@@ -47,6 +47,7 @@ export function ExtendExpiryModal({ currentExpiresAt, onCancel, onConfirm }: Pro
   const pickQuick = (value: number) => {
     setTarget(value)
     setViewMonth(firstOfMonth(value))
+    setShowCal(false)
   }
 
   const dateLabel = new Date(target).toLocaleDateString(undefined, {
@@ -81,30 +82,34 @@ export function ExtendExpiryModal({ currentExpiresAt, onCancel, onConfirm }: Pro
 
         <div className="space-y-1.5">
           <span className="text-muted-foreground text-xs">Or pick a date</span>
-          <button
-            type="button"
-            onClick={() => setShowCal((s) => !s)}
-            aria-expanded={showCal}
-            className="border-input bg-background hover:bg-muted flex h-9 w-full cursor-pointer items-center gap-2 rounded-md border px-3 text-left text-sm shadow-xs transition-colors"
-          >
-            <CalendarDays className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-foreground flex-1">{dateLabel}</span>
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowCal((s) => !s)}
+              aria-expanded={showCal}
+              className="border-input bg-background hover:bg-muted flex h-9 w-full cursor-pointer items-center gap-2 rounded-md border px-3 text-left text-sm shadow-xs transition-colors"
+            >
+              <CalendarDays className="text-muted-foreground size-4 shrink-0" />
+              <span className="text-foreground flex-1">{dateLabel}</span>
+            </button>
 
-          {showCal && (
-            <div className="bg-popover overflow-hidden rounded-md border">
-              <Calendar
-                value={new Date(target)}
-                min={new Date(now)}
-                month={viewMonth}
-                onMonthChange={setViewMonth}
-                onSelect={(d) => {
-                  setTarget(endOfDay(d))
-                  setShowCal(false)
-                }}
-              />
-            </div>
-          )}
+            {/* Floats above the trigger so it doesn't push the modal open;
+                absolute → the box shrinks to the calendar's width. */}
+            {showCal && (
+              <div className="bg-popover absolute bottom-full left-0 z-50 mb-2 rounded-md border shadow-lg">
+                <Calendar
+                  value={new Date(target)}
+                  min={new Date(now)}
+                  month={viewMonth}
+                  onMonthChange={setViewMonth}
+                  onSelect={(d) => {
+                    setTarget(endOfDay(d))
+                    setShowCal(false)
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         <DialogFooter>
