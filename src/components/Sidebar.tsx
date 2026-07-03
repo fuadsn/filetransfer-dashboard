@@ -1,10 +1,12 @@
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { AlertTriangle, ShieldAlert, Star } from 'lucide-react'
 import type { Transfer } from '../types'
 import type { AttentionReason } from '../lib/attention'
 import { attentionReasons } from '../lib/attention'
 import { memberById } from '../data/mockData'
-import { expiryLabel } from '../lib/format'
+import { expiryLabel, formatBytes, relativeExpiry, totalSize } from '../lib/format'
+import { filterTransfers, isFilterActive } from '../lib/filter'
+import type { UiState } from '../lib/storage'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -17,6 +19,7 @@ const MOD_KEY =
 
 interface Props {
   transfers: Transfer[]
+  ui: UiState
   open: boolean
   loading: boolean
   onToggle: () => void
@@ -33,13 +36,48 @@ const isCritical = (reasons: AttentionReason[]) => reasons.some((r) => r.severit
 
 const bySoonestExpiry = (a: Flagged, b: Flagged) => a.transfer.expiresAt - b.transfer.expiresAt
 
-export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
+export function Sidebar({ transfers, ui, open, loading, onToggle, onOpen }: Props) {
+  // Capture "now" once on mount so render stays pure (React 19 purity rule).
+  const [now] = useState(() => Date.now())
+
   const flagged: Flagged[] = transfers
-    .map((t) => ({ transfer: t, reasons: attentionReasons(t) }))
+    .map((t) => ({ transfer: t, reasons: attentionReasons(t, now) }))
     .filter((x) => x.reasons.length > 0)
 
   const critical = flagged.filter((x) => isCritical(x.reasons)).sort(bySoonestExpiry)
-  const attention = flagged.filter((x) => !isCritical(x.reasons)).sort(bySoonestExpiry)
+  const warning = flagged.filter((x) => !isCritical(x.reasons)).sort(bySoonestExpiry)
+
+  // Filter-aware: the flagged transfers NOT in the dashboard's current filtered
+  // view. When a filter/search is active these are exactly the items the user
+  // can't see in the table — surfacing them is the sidebar's reason to exist,
+  // rather than mirroring rows already on screen.
+  const filterActive = isFilterActive(ui)
+  const visibleIds = new Set(filterTransfers(transfers, ui).map((t) => t.id))
+  const hiddenWarning = warning.filter((x) => !visibleIds.has(x.transfer.id))
+
+  // Aggregate signal the table doesn't surface: counts by reason, the soonest
+  // deadline, and the total bytes riding on flagged links.
+  const metrics = [
+    { key: 'security', value: critical.length, label: 'security', tone: 'text-destructive' },
+    {
+      key: 'expiring',
+      value: flagged.filter((x) => x.reasons.some((r) => r.kind === 'expiring')).length,
+      label: 'expiring',
+      tone: 'text-attention',
+    },
+    {
+      key: 'stale',
+      value: flagged.filter((x) => x.reasons.some((r) => r.kind === 'stale_no_activity')).length,
+      label: 'stale',
+      tone: 'text-foreground',
+    },
+  ].filter((m) => m.value > 0)
+
+  const soonest = warning
+    .map((x) => x.transfer)
+    .filter((t) => !t.disabled && t.expiresAt > now)
+    .sort((a, b) => a.expiresAt - b.expiresAt)[0]
+  const sizeAtRisk = flagged.reduce((sum, x) => sum + totalSize(x.transfer), 0)
 
   return (
     <aside
@@ -78,9 +116,52 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
                 <AttentionSkeleton />
               </div>
             </>
+          ) : flagged.length === 0 ? (
+            <>
+              <div className="flex items-center gap-2 border-b px-4 py-3">
+                <AlertTriangle className="text-attention size-4 shrink-0" />
+                <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
+                <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
+                  0
+                </span>
+              </div>
+              <p className="text-muted-foreground p-4 text-sm">
+                Nothing needs attention right now — you're all caught up.
+              </p>
+            </>
           ) : (
             <>
-              {/* Security — critical, red scheme, pinned above */}
+              {/* At a glance — aggregate metrics the main table doesn't show, so
+                  the sidebar complements the list rather than mirroring it. */}
+              <div className="border-b px-4 py-3.5">
+                <div className="text-faint mb-2.5 text-[11px] font-medium tracking-wide uppercase">
+                  At a glance
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  {metrics.map((m) => (
+                    <span key={m.key} className="flex items-baseline gap-1">
+                      <span
+                        className={cn('font-title text-base font-semibold tabular-nums', m.tone)}
+                      >
+                        {m.value}
+                      </span>
+                      <span className="text-muted-foreground text-xs">{m.label}</span>
+                    </span>
+                  ))}
+                </div>
+                <div className="text-muted-foreground mt-2.5 flex flex-wrap items-center gap-x-1.5 text-xs">
+                  {soonest && (
+                    <>
+                      <span>Soonest {relativeExpiry(soonest.expiresAt, now)}</span>
+                      <span className="text-faint">·</span>
+                    </>
+                  )}
+                  <span>{formatBytes(sizeAtRisk)} at risk</span>
+                </div>
+              </div>
+
+              {/* Security — critical, red scheme. Always pinned as rows: too
+                  high-stakes to fold into a count, even if already on screen. */}
               {critical.length > 0 && (
                 <section>
                   <div className="flex items-center gap-2 border-b px-4 py-3">
@@ -98,8 +179,10 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
                 </section>
               )}
 
-              {/* Needs attention — time-based warnings, amber */}
-              {attention.length > 0 && (
+              {/* Needs attention — filter-aware. With a filter active we surface
+                  the flagged items hidden from the current view; unfiltered they
+                  all sit in the list, so we point there instead of duplicating. */}
+              {warning.length > 0 && (
                 <section>
                   <div
                     className={cn(
@@ -111,30 +194,34 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
                     <AlertTriangle className="text-attention size-4 shrink-0" />
                     <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
                     <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
-                      {attention.length}
+                      {warning.length}
                     </span>
                   </div>
-                  <div className="divide-border divide-y">
-                    {attention.map((f) => (
-                      <AttentionItem key={f.transfer.id} flagged={f} onOpen={onOpen} />
-                    ))}
-                  </div>
-                </section>
-              )}
 
-              {flagged.length === 0 && (
-                <>
-                  <div className="flex items-center gap-2 border-b px-4 py-3">
-                    <AlertTriangle className="text-attention size-4 shrink-0" />
-                    <h2 className="text-foreground text-sm font-semibold">Needs attention</h2>
-                    <span className="bg-muted text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
-                      0
-                    </span>
-                  </div>
-                  <p className="text-muted-foreground p-4 text-sm">
-                    Nothing needs attention right now — you're all caught up.
-                  </p>
-                </>
+                  {filterActive ? (
+                    hiddenWarning.length > 0 ? (
+                      <>
+                        <p className="text-faint px-4 pt-3 text-[11px] font-medium tracking-wide uppercase">
+                          Hidden by your filter
+                        </p>
+                        <div className="divide-border divide-y">
+                          {hiddenWarning.map((f) => (
+                            <AttentionItem key={f.transfer.id} flagged={f} onOpen={onOpen} />
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-muted-foreground px-4 py-3 text-sm">
+                        All flagged transfers match your current filter — nothing hidden.
+                      </p>
+                    )
+                  ) : (
+                    <p className="text-muted-foreground px-4 py-3 text-sm">
+                      {warning.length === 1 ? 'This one is' : `All ${warning.length} are`} in your
+                      list. Filter or search to surface hidden ones here.
+                    </p>
+                  )}
+                </section>
               )}
             </>
           )}

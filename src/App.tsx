@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { MotionConfig } from 'motion/react'
-import { PanelRight } from 'lucide-react'
+import { ChevronRight, PanelRight } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Transfer } from './types'
 import { useTransfers } from './lib/useTransfers'
 import { loadUiState, saveUiState, type UiState } from './lib/storage'
-import { useTheme } from './lib/useTheme'
+import { useTheme, type RevealOrigin, type Theme } from './lib/useTheme'
 import { Dashboard } from './components/Dashboard'
 import { TransferDetail } from './components/TransferDetail'
 import { ExtendExpiryModal } from './components/ExtendExpiryModal'
@@ -91,26 +91,14 @@ export default function App() {
       )}
 
       <main className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center justify-end gap-2 px-4 pt-4">
-          {loading ? (
-            <>
-              <Skeleton className="size-9 rounded-full" />
-              <Skeleton className="size-9 rounded-md" />
-            </>
-          ) : (
-            <>
-              <ThemeToggle theme={theme} onToggle={toggleTheme} />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSidebarOpen((o) => !o)}
-                aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-              >
-                <PanelRight className="size-4" />
-              </Button>
-            </>
-          )}
-        </div>
+        <HeaderBar
+          transfers={transfers}
+          loading={loading}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen((o) => !o)}
+        />
 
         <Routes>
           <Route
@@ -143,6 +131,7 @@ export default function App() {
 
       <Sidebar
         transfers={transfers}
+        ui={ui}
         open={sidebarOpen}
         loading={loading}
         onToggle={() => setSidebarOpen((o) => !o)}
@@ -180,7 +169,6 @@ function TransferRoute({
   onExtendClick: (id: string) => void
 }) {
   const { id } = useParams()
-  const navigate = useNavigate()
   const transfer = transfers.find((t) => t.id === id)
 
   if (!transfer) return <Navigate to="/" replace />
@@ -188,10 +176,77 @@ function TransferRoute({
   return (
     <TransferDetail
       transfer={transfer}
-      onBack={() => navigate('/')}
       onToggleFavorite={onToggleFavorite}
       onDisable={onDisable}
       onExtendClick={onExtendClick}
     />
+  )
+}
+
+// Persistent top chrome shown on both routes. On the dashboard it labels the
+// view; on a transfer detail it shows a "Dashboard › Title" breadcrumb so the
+// navigation context never disappears into a blank band. Sticky, so the
+// breadcrumb and controls stay reachable while scrolling a long page.
+function HeaderBar({
+  transfers,
+  loading,
+  theme,
+  onToggleTheme,
+  sidebarOpen,
+  onToggleSidebar,
+}: {
+  transfers: Transfer[]
+  loading: boolean
+  theme: Theme
+  onToggleTheme: (origin?: RevealOrigin) => void
+  sidebarOpen: boolean
+  onToggleSidebar: () => void
+}) {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const match = matchPath('/transfers/:id', pathname)
+  const transfer = match ? transfers.find((t) => t.id === match.params.id) : null
+
+  return (
+    <header className="bg-background/80 border-border/60 sticky top-0 z-20 flex items-center justify-between gap-3 border-b px-4 py-3 backdrop-blur">
+      <div className="flex min-w-0 items-center gap-1.5 text-sm">
+        {transfer ? (
+          <>
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="text-muted-foreground hover:text-foreground shrink-0 cursor-pointer font-medium transition-colors"
+            >
+              Dashboard
+            </button>
+            <ChevronRight className="text-faint size-4 shrink-0" />
+            <span className="text-foreground min-w-0 truncate font-medium">{transfer.title}</span>
+          </>
+        ) : (
+          <span className="text-foreground font-medium">Dashboard</span>
+        )}
+      </div>
+
+      <div className="flex shrink-0 items-center gap-2">
+        {loading ? (
+          <>
+            <Skeleton className="size-9 rounded-full" />
+            <Skeleton className="size-9 rounded-md" />
+          </>
+        ) : (
+          <>
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleSidebar}
+              aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            >
+              <PanelRight className="size-4" />
+            </Button>
+          </>
+        )}
+      </div>
+    </header>
   )
 }
