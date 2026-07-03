@@ -20,6 +20,13 @@ export interface FileItem {
   name: string
   sizeBytes: number
   type: FileType
+  /**
+   * Source for an in-app preview. Present only for previewable types
+   * (image / video / pdf) that have a real bundled asset under
+   * `public/samples/`. Absent for zip / doc / other → the UI shows a
+   * "no preview available" state. See isPreviewable() in lib/format.ts.
+   */
+  url?: string
 }
 
 /**

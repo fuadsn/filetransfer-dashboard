@@ -1,9 +1,13 @@
 import { useState } from 'react'
-import { AlertTriangle, ArrowLeft, Ban, Check, Copy, Star } from 'lucide-react'
-import type { ActivityAction, Transfer } from '../types'
+import { motion } from 'motion/react'
+import { toast } from 'sonner'
+import { AlertTriangle, ArrowLeft, Ban, Check, Copy, Eye, Lock, Star } from 'lucide-react'
+import type { ActivityAction, FileItem, Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { attentionReasons } from '../lib/attention'
-import { deriveStatus, expiryLabel, fileTypeMeta, formatBytes, relativeTime } from '../lib/format'
+import { deriveStatus, expiryLabel, fileTypeMeta, formatBytes, previewKind, relativeTime } from '../lib/format'
+import { useFavoritePop } from '../lib/useFavoritePop'
+import { FilePreview } from './FilePreview'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -36,6 +40,7 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
   const locked = status === 'expired' || status === 'disabled'
 
   const [copied, setCopied] = useState(false)
+  const [preview, setPreview] = useState<FileItem | null>(null)
   const copyLink = () => {
     const url = `https://cloud.studio.co/t/${transfer.id}`
     void navigator.clipboard?.writeText(url).catch(() => {})
@@ -45,12 +50,15 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
 
   const activity = [...transfer.activity].sort((a, b) => b.timestamp - a.timestamp)
 
+  // Subtle Instagram-like pop when the transfer becomes favorited.
+  const starControls = useFavoritePop(transfer.favorited)
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
+    <div className="mx-auto max-w-3xl px-4 py-6">
       <button
         type="button"
         onClick={onBack}
-        className="text-muted-foreground hover:text-foreground mb-4 flex items-center gap-1.5 text-sm transition-colors"
+        className="text-muted-foreground hover:text-foreground mb-5 flex cursor-pointer items-center gap-1.5 text-sm transition-colors"
       >
         <ArrowLeft className="size-4" />
         Back to dashboard
@@ -85,7 +93,9 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
               aria-label="Toggle favorite"
               className={transfer.favorited ? 'text-expiring hover:text-expiring' : 'text-faint'}
             >
-              <Star className={cn('size-5', transfer.favorited && 'fill-current')} />
+              <motion.span animate={starControls} className="inline-flex">
+                <Star className={cn('size-5', transfer.favorited && 'fill-current')} />
+              </motion.span>
             </Button>
           </div>
 
@@ -118,16 +128,17 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
             </div>
           )}
 
-          {/* Actions — Copy link + Extend expiry are the two primary (PRD §4.2) */}
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={copyLink} disabled={status === 'disabled'}>
-              {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-              {copied ? 'Copied' : 'Copy link'}
-            </Button>
-            <Button variant="outline" onClick={() => onExtendClick(transfer.id)}>
-              Extend expiry
-            </Button>
-            {!transfer.disabled && (
+          {/* Actions — hidden for disabled links (the banner above explains why
+              they're unavailable). Copy link + Extend expiry are primary (§4.2). */}
+          {!transfer.disabled && (
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={copyLink}>
+                {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+                {copied ? 'Copied' : 'Copy link'}
+              </Button>
+              <Button variant="outline" onClick={() => onExtendClick(transfer.id)}>
+                Extend expiry
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => onDisable(transfer.id)}
@@ -136,8 +147,8 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
                 <Ban className="size-4" />
                 Disable link
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -150,13 +161,57 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
           <ul className="divide-y">
             {transfer.files.map((f) => {
               const { Icon, label } = fileTypeMeta(f.type)
+              const canPreview = previewKind(f) !== null
+
+              // Disabled link = files are locked; no preview (matches the dead
+              // link + hidden actions). Expired stays previewable (recoverable).
+              if (transfer.disabled) {
+                return (
+                  <li key={f.id}>
+                    <div className="flex items-center gap-3 px-2 py-2.5">
+                      <Icon className="text-muted-foreground size-5 shrink-0" aria-label={label} />
+                      <span className="text-muted-foreground min-w-0 flex-1 truncate text-sm">
+                        {f.name}
+                      </span>
+                      <span className="text-faint flex shrink-0 items-center gap-1 text-xs">
+                        <Lock className="size-3.5" />
+                        Locked
+                      </span>
+                      <span className="text-muted-foreground shrink-0 text-sm">
+                        {formatBytes(f.sizeBytes)}
+                      </span>
+                    </div>
+                  </li>
+                )
+              }
+
+              // Previewable files open the modal; the rest can't be rendered
+              // in-browser, so clicking just explains that with a toast.
+              const onClick = () =>
+                canPreview
+                  ? setPreview(f)
+                  : toast(`Can’t preview ${label.toLowerCase()} files`, {
+                      description: 'This file type can only be downloaded, not previewed here.',
+                    })
               return (
-                <li key={f.id} className="flex items-center gap-3 py-2.5">
-                  <Icon className="text-muted-foreground size-5 shrink-0" aria-label={label} />
-                  <span className="text-foreground min-w-0 flex-1 truncate text-sm">{f.name}</span>
-                  <span className="text-muted-foreground shrink-0 text-sm">
-                    {formatBytes(f.sizeBytes)}
-                  </span>
+                <li key={f.id}>
+                  <button
+                    type="button"
+                    onClick={onClick}
+                    className="group hover:bg-muted -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center gap-3 rounded-md px-2 py-2.5 text-left transition-colors"
+                  >
+                    <Icon className="text-muted-foreground size-5 shrink-0" aria-label={label} />
+                    <span className="text-foreground min-w-0 flex-1 truncate text-sm">{f.name}</span>
+                    {canPreview && (
+                      <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs opacity-0 transition-opacity group-hover:opacity-100">
+                        <Eye className="size-3.5" />
+                        Preview
+                      </span>
+                    )}
+                    <span className="text-muted-foreground shrink-0 text-sm">
+                      {formatBytes(f.sizeBytes)}
+                    </span>
+                  </button>
                 </li>
               )
             })}
@@ -205,6 +260,8 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
           </ol>
         </CardContent>
       </Card>
+
+      <FilePreview file={preview} onOpenChange={(open) => !open && setPreview(null)} />
     </div>
   )
 }

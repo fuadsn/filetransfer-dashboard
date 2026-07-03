@@ -39,12 +39,18 @@ const DAY = 24 * HOUR
  * mock defaults; the user's persisted overrides are layered on top elsewhere.
  */
 export function generateTransfers(now: number = Date.now()): Transfer[] {
-  const file = (id: string, name: string, sizeBytes: number, type: FileItem['type']): FileItem => ({
-    id,
-    name,
-    sizeBytes,
-    type,
-  })
+  // `url` points at a real bundled asset under public/samples/ for the
+  // previewable types (image / video / pdf); omit it and the file shows a
+  // "no preview available" state. Displayed sizes are cosmetic and need not
+  // match the actual asset byte size.
+  const file = (
+    id: string,
+    name: string,
+    sizeBytes: number,
+    type: FileItem['type'],
+    url?: string,
+  ): FileItem => ({ id, name, sizeBytes, type, ...(url ? { url } : {}) })
+  const sample = (name: string) => `${import.meta.env.BASE_URL}samples/${name}`
   const ev = (
     id: string,
     actorId: string,
@@ -60,9 +66,9 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       senderId: 'u1',
       recipientIds: ['u2', 'u4'],
       files: [
-        file('f1a', 'brand-guidelines-v4.pdf', 8_400_000, 'pdf'),
+        file('f1a', 'brand-guidelines-v4.pdf', 8_400_000, 'pdf', sample('brand-guidelines-v4.pdf')),
         file('f1b', 'logo-lockups.zip', 46_200_000, 'zip'),
-        file('f1c', 'hero-banner.png', 3_100_000, 'image'),
+        file('f1c', 'hero-banner.png', 3_100_000, 'image', sample('hero-banner.png')),
       ],
       createdAt: now - 2 * DAY,
       expiresAt: now + 5 * DAY,
@@ -81,8 +87,8 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       senderId: 'u3',
       recipientIds: ['u1'],
       files: [
-        file('f2a', 'ep47-master.mp4', 1_240_000_000, 'video'),
-        file('f2b', 'ep47-cover.jpg', 820_000, 'image'),
+        file('f2a', 'ep47-master.mp4', 1_240_000_000, 'video', sample('ep47-master.mp4')),
+        file('f2b', 'ep47-cover.jpg', 820_000, 'image', sample('ep47-cover.jpg')),
       ],
       createdAt: now - 1 * DAY,
       expiresAt: now + 6 * DAY,
@@ -99,7 +105,7 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       title: 'Investor update deck (confidential)',
       senderId: 'u1',
       recipientIds: ['u4', 'u5'],
-      files: [file('f3a', 'investor-update-jul.pdf', 5_600_000, 'pdf')],
+      files: [file('f3a', 'investor-update-jul.pdf', 5_600_000, 'pdf', sample('investor-update-jul.pdf'))],
       createdAt: now - 5 * HOUR,
       expiresAt: now + 10 * DAY,
       disabled: false,
@@ -116,7 +122,7 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       senderId: 'u4',
       recipientIds: ['u2', 'u3', 'u5'],
       files: [
-        file('f4a', 'onboarding-handbook.pdf', 12_800_000, 'pdf'),
+        file('f4a', 'onboarding-handbook.pdf', 12_800_000, 'pdf', sample('onboarding-handbook.pdf')),
         file('f4b', 'benefits-overview.docx', 340_000, 'doc'),
       ],
       createdAt: now - 3 * DAY,
@@ -131,7 +137,7 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       title: 'Legal contract — NDA countersigned',
       senderId: 'u5',
       recipientIds: ['u1'],
-      files: [file('f5a', 'nda-countersigned.pdf', 1_900_000, 'pdf')],
+      files: [file('f5a', 'nda-countersigned.pdf', 1_900_000, 'pdf', sample('nda-countersigned.pdf'))],
       createdAt: now - 6 * HOUR,
       expiresAt: now + 14 * DAY,
       disabled: false,
@@ -149,7 +155,7 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       recipientIds: ['u3'],
       files: [
         file('f6a', 'shoot-raws-batch1.zip', 4_600_000_000, 'zip'),
-        file('f6b', 'contact-sheet.jpg', 2_400_000, 'image'),
+        file('f6b', 'contact-sheet.jpg', 2_400_000, 'image', sample('contact-sheet.jpg')),
       ],
       createdAt: now - 20 * HOUR,
       expiresAt: now + 8 * HOUR,
@@ -166,7 +172,7 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       title: 'Wire transfer confirmation',
       senderId: 'u5',
       recipientIds: ['u4'],
-      files: [file('f7a', 'wire-confirmation-8841.pdf', 210_000, 'pdf')],
+      files: [file('f7a', 'wire-confirmation-8841.pdf', 210_000, 'pdf', sample('wire-confirmation-8841.pdf'))],
       createdAt: now - 2 * DAY,
       expiresAt: now + 3 * HOUR,
       disabled: false,
@@ -181,6 +187,7 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       recipientIds: ['u1', 'u2'],
       files: [
         file('f8a', 'spring-campaign-assets.zip', 780_000_000, 'zip'),
+        file('f8c', 'spring-campaign-hero.jpg', 2_700_000, 'image', sample('spring-campaign-hero.jpg')),
         file('f8b', 'usage-notes.txt', 4_200, 'other'),
       ],
       createdAt: now - 10 * DAY,
@@ -199,7 +206,10 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       title: 'Draft press release v2',
       senderId: 'u1',
       recipientIds: ['u5'],
-      files: [file('f9a', 'press-release-v2.docx', 96_000, 'doc')],
+      files: [
+        file('f9a', 'press-release-v2.docx', 96_000, 'doc'),
+        file('f9b', 'press-release-v2.pdf', 88_000, 'pdf', sample('press-release-v2.pdf')),
+      ],
       createdAt: now - 6 * DAY,
       expiresAt: now - 1 * DAY,
       disabled: false,
@@ -215,7 +225,10 @@ export function generateTransfers(now: number = Date.now()): Transfer[] {
       title: 'Payroll spreadsheet (November)',
       senderId: 'u4',
       recipientIds: ['u1'],
-      files: [file('f10a', 'payroll-nov.xlsx', 1_100_000, 'doc')],
+      files: [
+        file('f10a', 'payroll-nov.xlsx', 1_100_000, 'doc'),
+        file('f10b', 'payroll-summary-nov.pdf', 180_000, 'pdf', sample('payroll-summary-nov.pdf')),
+      ],
       createdAt: now - 3 * DAY,
       expiresAt: now + 2 * DAY, // still within window, but manually disabled
       disabled: true,

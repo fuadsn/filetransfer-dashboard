@@ -1,5 +1,5 @@
 import { File, FileArchive, FileText, Image, Video, type LucideIcon } from 'lucide-react'
-import type { FileType, Transfer, TransferStatus } from '../types'
+import type { FileItem, FileType, Transfer, TransferStatus } from '../types'
 
 // Threshold at which an active transfer is considered "expiring soon".
 export const EXPIRING_WINDOW_MS = 24 * 60 * 60 * 1000 // 24h
@@ -58,6 +58,20 @@ export function fileTypeMeta(type: FileType): { Icon: LucideIcon; label: string 
     default:
       return { Icon: File, label: 'File' }
   }
+}
+
+/**
+ * A file can be previewed in-app when it's a rendered-in-browser type AND has
+ * a real asset URL. Returns the concrete preview "kind" so the UI can pick the
+ * right element (<img> / <video> / <iframe>), or null when there's nothing to
+ * show. Single source of truth for the preview feature.
+ */
+export function previewKind(file: FileItem): 'image' | 'video' | 'pdf' | null {
+  if (!file.url) return null
+  if (file.type === 'image' || file.type === 'video' || file.type === 'pdf') {
+    return file.type
+  }
+  return null
 }
 
 // --- Formatting -------------------------------------------------------------
