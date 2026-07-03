@@ -1,5 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react'
-import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { matchPath, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { MotionConfig } from 'motion/react'
 import { ChevronRight, PanelRight } from 'lucide-react'
 import { toast } from 'sonner'
@@ -183,10 +183,11 @@ function TransferRoute({
   )
 }
 
-// Persistent top chrome shown on both routes. On the dashboard it labels the
-// view; on a transfer detail it shows a "Dashboard › Title" breadcrumb so the
-// navigation context never disappears into a blank band. Sticky, so the
-// breadcrumb and controls stay reachable while scrolling a long page.
+// Persistent top bar, identical on every route: a "Dashboard" label (or a
+// "Dashboard › Title" breadcrumb on a detail page) on the left, and the theme +
+// sidebar controls on the right. The search/filter bar is separate content the
+// dashboard renders below — the header itself never carries it. Sticky, so the
+// context and controls stay reachable while scrolling.
 function HeaderBar({
   transfers,
   loading,
