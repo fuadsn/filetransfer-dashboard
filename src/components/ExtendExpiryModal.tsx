@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CalendarDays } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -8,14 +9,20 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { cn } from '@/lib/utils'
+import { Calendar } from '@/components/ui/calendar'
 
-// Stage 7 (micro-interaction). Quick-select chips (+1d / +7d / +30d) or a date
-// input. Rendered only while extending, so internal state is fresh each open.
+// Stage 7 (micro-interaction). Quick-select chips (+1d / +7d / +30d) or a
+// themed calendar. Rendered only while extending, so state is fresh each open.
 
 const DAY = 24 * 60 * 60 * 1000
+
+const firstOfMonth = (ms: number) => {
+  const d = new Date(ms)
+  return new Date(d.getFullYear(), d.getMonth(), 1)
+}
+// Expire at the end of the chosen day, so "today" stays in the future.
+const endOfDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59).getTime()
 
 interface Props {
   currentExpiresAt: number
@@ -28,6 +35,8 @@ export function ExtendExpiryModal({ currentExpiresAt, onCancel, onConfirm }: Pro
   const [now] = useState(() => Date.now())
   const base = Math.max(currentExpiresAt, now)
   const [target, setTarget] = useState<number>(base + 7 * DAY)
+  const [viewMonth, setViewMonth] = useState<Date>(() => firstOfMonth(base + 7 * DAY))
+  const [showCal, setShowCal] = useState(false)
 
   const quick = [
     { label: '+1 day', value: base + 1 * DAY },
@@ -35,7 +44,16 @@ export function ExtendExpiryModal({ currentExpiresAt, onCancel, onConfirm }: Pro
     { label: '+30 days', value: base + 30 * DAY },
   ]
 
-  const asDateInput = (ms: number) => new Date(ms).toISOString().slice(0, 10)
+  const pickQuick = (value: number) => {
+    setTarget(value)
+    setViewMonth(firstOfMonth(value))
+  }
+
+  const dateLabel = new Date(target).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 
   return (
     <Dialog open onOpenChange={(open) => !open && onCancel()}>
@@ -53,8 +71,8 @@ export function ExtendExpiryModal({ currentExpiresAt, onCancel, onConfirm }: Pro
               key={q.label}
               type="button"
               variant={target === q.value ? 'default' : 'outline'}
-              onClick={() => setTarget(q.value)}
-              className={cn('flex-1')}
+              onClick={() => pickQuick(q.value)}
+              className="flex-1"
             >
               {q.label}
             </Button>
@@ -62,16 +80,31 @@ export function ExtendExpiryModal({ currentExpiresAt, onCancel, onConfirm }: Pro
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="expiry-date" className="text-muted-foreground text-xs">
-            Or pick a date
-          </Label>
-          <Input
-            id="expiry-date"
-            type="date"
-            value={asDateInput(target)}
-            min={asDateInput(now)}
-            onChange={(e) => setTarget(new Date(e.target.value).getTime())}
-          />
+          <span className="text-muted-foreground text-xs">Or pick a date</span>
+          <button
+            type="button"
+            onClick={() => setShowCal((s) => !s)}
+            aria-expanded={showCal}
+            className="border-input bg-background hover:bg-muted flex h-9 w-full cursor-pointer items-center gap-2 rounded-md border px-3 text-left text-sm shadow-xs transition-colors"
+          >
+            <CalendarDays className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-foreground flex-1">{dateLabel}</span>
+          </button>
+
+          {showCal && (
+            <div className="bg-popover overflow-hidden rounded-md border">
+              <Calendar
+                value={new Date(target)}
+                min={new Date(now)}
+                month={viewMonth}
+                onMonthChange={setViewMonth}
+                onSelect={(d) => {
+                  setTarget(endOfDay(d))
+                  setShowCal(false)
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <DialogFooter>
