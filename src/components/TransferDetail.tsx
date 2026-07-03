@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
-import { AlertTriangle, ArrowLeft, Ban, Check, Copy, Eye, Lock, Star } from 'lucide-react'
+import { AlertTriangle, Ban, CalendarClock, Check, Copy, Eye, Lock, Star } from 'lucide-react'
 import type { ActivityAction, FileItem, Transfer } from '../types'
 import { memberById } from '../data/mockData'
 import { attentionReasons } from '../lib/attention'
@@ -18,7 +18,6 @@ import { StatusPill } from './StatusPill'
 
 interface Props {
   transfer: Transfer
-  onBack: () => void
   onToggleFavorite: (id: string) => void
   onDisable: (id: string) => void
   onExtendClick: (id: string) => void
@@ -33,7 +32,7 @@ const actionVerb: Record<ActivityAction, string> = {
   access_denied: 'was denied access (link disabled)',
 }
 
-export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, onExtendClick }: Props) {
+export function TransferDetail({ transfer, onToggleFavorite, onDisable, onExtendClick }: Props) {
   const status = deriveStatus(transfer)
   const sender = memberById(transfer.senderId)
   const reasons = attentionReasons(transfer)
@@ -55,15 +54,6 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <button
-        type="button"
-        onClick={onBack}
-        className="text-muted-foreground hover:text-foreground mb-5 flex cursor-pointer items-center gap-1.5 text-sm transition-colors"
-      >
-        <ArrowLeft className="size-4" />
-        Back to dashboard
-      </button>
-
       {/* Header */}
       <Card className={cn(locked && 'opacity-90')}>
         <CardContent className="space-y-4">
@@ -137,6 +127,7 @@ export function TransferDetail({ transfer, onBack, onToggleFavorite, onDisable, 
                 {copied ? 'Copied' : 'Copy link'}
               </Button>
               <Button variant="outline" onClick={() => onExtendClick(transfer.id)}>
+                <CalendarClock className="size-4" />
                 Extend expiry
               </Button>
               <Button
