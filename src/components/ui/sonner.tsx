@@ -10,6 +10,8 @@ function Toaster({ ...props }: ToasterProps) {
   return (
     <Sonner
       theme={theme}
+      // Every toast gets a close button so it's always manually dismissable.
+      closeButton
       className="toaster group"
       style={
         {
