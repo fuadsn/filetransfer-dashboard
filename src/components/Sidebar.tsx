@@ -1,16 +1,19 @@
 import { Fragment } from 'react'
-import { AlertTriangle, PanelRightClose, ShieldAlert, Star } from 'lucide-react'
+import { AlertTriangle, ShieldAlert, Star } from 'lucide-react'
 import type { Transfer } from '../types'
 import type { AttentionReason } from '../lib/attention'
 import { attentionReasons } from '../lib/attention'
 import { memberById } from '../data/mockData'
 import { expiryLabel } from '../lib/format'
-import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { Avatar } from './Avatar'
 import { AttentionSkeleton } from './States'
+
+// Platform-aware modifier symbol for the collapse-shortcut hint.
+const MOD_KEY =
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.userAgent) ? '⌘' : 'Ctrl'
 
 interface Props {
   transfers: Transfer[]
@@ -51,28 +54,17 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
       )}
     >
       <div className="flex h-full w-80 flex-col">
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="min-w-0">
-            {loading ? (
-              <div className="space-y-1.5 py-0.5">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-            ) : (
-              <>
-                <div className="font-title text-foreground truncate font-semibold">
-                  Team Cloud
-                </div>
-                <div className="text-muted-foreground text-xs">Workspace</div>
-              </>
-            )}
-          </div>
+        <div className="min-w-0 px-4 py-4">
           {loading ? (
-            <Skeleton className="size-9 rounded-md" />
+            <div className="space-y-1.5 py-0.5">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </div>
           ) : (
-            <Button variant="ghost" size="icon" onClick={onToggle} aria-label="Collapse sidebar">
-              <PanelRightClose className="size-4" />
-            </Button>
+            <>
+              <div className="font-title text-foreground truncate font-semibold">Team Cloud</div>
+              <div className="text-muted-foreground text-xs">Workspace</div>
+            </>
           )}
         </div>
 
@@ -147,6 +139,23 @@ export function Sidebar({ transfers, open, loading, onToggle, onOpen }: Props) {
             </>
           )}
         </div>
+
+        {/* Footer — doubles as a collapse control and teaches the shortcut */}
+        <button
+          type="button"
+          onClick={onToggle}
+          className="text-muted-foreground hover:text-foreground hover:bg-muted flex w-full cursor-pointer items-center gap-2 border-t px-4 py-3 text-xs transition-colors"
+        >
+          <span>Hide sidebar</span>
+          <span className="ml-auto flex items-center gap-1">
+            <kbd className="border-border bg-background rounded border px-1.5 py-0.5 text-[11px] font-medium">
+              {MOD_KEY}
+            </kbd>
+            <kbd className="border-border bg-background rounded border px-1.5 py-0.5 text-[11px] font-medium">
+              B
+            </kbd>
+          </span>
+        </button>
       </div>
     </aside>
   )
@@ -160,7 +169,7 @@ function AttentionItem({ flagged, onOpen }: { flagged: Flagged; onOpen: (id: str
     <button
       type="button"
       onClick={() => onOpen(transfer.id)}
-      className="hover:bg-muted focus-visible:ring-ring block w-full px-4 py-3 text-left transition-colors outline-none focus-visible:ring-2"
+      className="hover:bg-muted focus-visible:ring-ring block w-full cursor-pointer px-4 py-3 text-left transition-colors outline-none focus-visible:ring-2"
     >
       <div className="flex items-start gap-2.5">
         {/* avatar + carried-over star (favorited context) */}
