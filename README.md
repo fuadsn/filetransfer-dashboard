@@ -51,36 +51,12 @@ treatments on the detail screen. → `src/components/States.tsx`.
 
 ```
 src/
-  types.ts               Data model — Transfer, FileItem, TeamMember, overrides
-  data/mockData.ts       5 members + generateTransfers() (time-relative, hand-authored)
-  lib/
-    format.ts            deriveStatus, statusMeta, formatBytes, relative time
-    attention.ts         attention rules → reasons (+ severity), hasSecurityIssue
-    filter.ts            fuzzy tiered search (Fuse) gated by pill filters
-    storage.ts           localStorage read/write (overrides + UI state)
-    useTransfers.ts      state backbone: base data + overrides + mutations
-    useTheme.ts          light/dark (.dark class) + View-Transition reveal
-    useFavoritePop.ts    the favorite star pop animation
-    utils.ts             cn() — shadcn class merge helper
-  components/
-    ui/                  shadcn/ui primitives (button, card, dialog, sonner, …)
-    Sidebar.tsx          collapsible right sidebar — Security + Needs attention
-    Dashboard.tsx        search/filter + list + states (centered main column)
-    SearchFilterBar.tsx  fuzzy search + starred/member/status filters
-    TransferList.tsx     column headers + animated rows
-    TransferRow.tsx      one transfer row
-    StatusPill.tsx       status pill with synced pulsing dot
-    Avatar.tsx           photo avatar + initials fallback + stack
-    States.tsx           skeleton / empty / no-results
-    TransferDetail.tsx   detail screen + actions + file list
-    FilePreview.tsx      in-app image / video / PDF preview modal
-    ExtendExpiryModal.tsx / ThemeToggle.tsx
-  App.tsx                shell: routes ("/" · "/transfers/:id"), sidebar, overlays
-  index.css              design tokens (both themes) + animations
+  types.ts       data model — Transfer · FileItem · TeamMember · overrides
+  data/          hand-authored mock: 5 members + 10 time-relative transfers
+  lib/           logic — deriveStatus, attention rules, fuzzy filter, theme,
+                 useTransfers (mock baseline + localStorage overrides + UI state)
+  components/    ui/ (shadcn primitives) + screens: Dashboard, Sidebar,
+                 TransferList/Row, TransferDetail, FilePreview, modals
+  App.tsx        shell — routes ("/" · "/transfers/:id"), sidebar, overlays
+  index.css      design tokens (both themes) + animations
 ```
-
-Data model, mock generator, needs-attention logic, search/filter, all states,
-the detail screen + actions, file preview, micro-interactions, and localStorage
-persistence are complete. Both **dark and light** themes ship; layout is
-**responsive** (rows collapse and the sidebar becomes an overlay drawer on
-mobile).
