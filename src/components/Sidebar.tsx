@@ -100,8 +100,8 @@ export function Sidebar({ transfers, ui, open, loading, onToggle, onOpen }: Prop
             </div>
           ) : (
             <>
-              <div className="font-title text-foreground truncate font-semibold">Team Cloud</div>
-              <div className="text-muted-foreground text-xs">Workspace</div>
+              <div className="font-title text-foreground truncate font-semibold">File Transfer</div>
+              <div className="text-muted-foreground text-xs">Dashboard</div>
             </>
           )}
         </div>
