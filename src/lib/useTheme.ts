@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom'
 
 // Theme is applied via the `.dark` class on <html> (shadcn/ui convention). The
 // initial value is set by the inline boot script in index.html (prevents a
-// flash) and mirrored here so the toggle can flip + persist it. Dark is default.
+// flash) and mirrored here so the toggle can flip + persist it. Light is default.
 //
 // Switching uses the View Transitions API: the incoming theme is revealed by a
 // circle expanding outward from the toggle button (origin passed in). Browsers

@@ -30,23 +30,6 @@ Decisions, trade-offs, and AI tools used are in **[NOTES.md](NOTES.md)**.
 
 ---
 
-## Micro-interactions
-
-- **Copy link** → button flips to `Copied ✓` for ~1.5s (`TransferDetail`).
-- **Disable link** → optimistic status flip + **Undo** toast (`App` + sonner).
-- **Favorite** → instant toggle, persisted, star **pops** on favoriting
-  (`src/lib/useFavoritePop.ts`, Motion).
-- **Filter / search** → chips toggle; rows **fade + reflow** as the list changes
-  (Motion `AnimatePresence` / `layout` in `TransferList`).
-- **Extend expiry** → modal with `+1d / +7d / +30d` quick-chips or a **themed
-  calendar** popover (custom, follows the palette in both modes).
-- **File preview** → click a file to preview it in-app (image / video / PDF);
-  non-previewable types explain via a toast, and disabled links lock previews.
-  → `src/components/FilePreview.tsx`.
-- **Theme switch** → circular reveal from the toggle via the View Transitions API.
-- **Status dots** pulse per status (soft/fast blink, throb) and are **phase-synced**
-  across same-status pills.
-
 ## States
 
 Loading (full-shell **skeleton** — sidebar, search, and rows), **empty**,

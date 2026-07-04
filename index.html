@@ -6,15 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>File Transfer Dashboard</title>
     <script>
-      // Set theme before first paint to avoid a flash. Default: dark (black + blue).
-      // shadcn/ui toggles on the `.dark` class.
+      // Set theme before first paint to avoid a flash. Default: light.
+      // shadcn/ui toggles on the `.dark` class, so dark only when saved.
       (function () {
         try {
-          var t = localStorage.getItem('tcw:theme')
-          if (t !== 'light') document.documentElement.classList.add('dark')
-        } catch (e) {
-          document.documentElement.classList.add('dark')
-        }
+          if (localStorage.getItem('tcw:theme') === 'dark') {
+            document.documentElement.classList.add('dark')
+          }
+        } catch (e) {}
       })()
     </script>
   </head>
