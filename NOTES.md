@@ -28,8 +28,14 @@
 - **Client-side routing** (`BrowserRouter`) gives real, deep-linkable
   `/transfers/:id` URLs; a static host would need an SPA fallback in production
   (dev/preview already handle it).
-- **No list virtualization** — fine for 10 transfers; wouldn't scale to thousands
-  without it.
+- **No list virtualization.** Every transfer renders a real DOM row (with its
+  animated mount/exit via Motion). At 10 rows that's effortless and keeps the
+  code simple — no windowing library, no measured row heights, no scroll math.
+  It also means the whole list animates and re-flows smoothly on filter/search.
+  The cost is that it wouldn't scale: a few thousand rows would bog down layout
+  and the enter/exit animations. The fix at that point is windowing (e.g.
+  `@tanstack/virtual` / `react-window`) to render only the visible slice — a
+  deliberate deferral, since it adds complexity this dataset doesn't warrant.
 
 ## AI tools used
 
