@@ -6,6 +6,17 @@ product is the **transfer**, not the file.
 
 Mock data only — no backend, no auth, no real upload.
 
+**Live:** [filetransfer-dashboard.vercel.app](https://filetransfer-dashboard.vercel.app)
+· **Demo:** [screen recording](docs/screen-recording.mov)
+
+## Screenshots
+
+| Dashboard | Sidebar — At a glance · Security · Needs attention |
+|---|---|
+| [![Dashboard](docs/screenshots/01-dashboard.png)](docs/screenshots/01-dashboard.png) | [![Sidebar](docs/screenshots/02-sidebar.png)](docs/screenshots/02-sidebar.png) |
+| **Transfer detail** — files, recipients & activity, actions | **Extend expiry** — themed calendar |
+| [![Transfer detail](docs/screenshots/03-transfer-detail.png)](docs/screenshots/03-transfer-detail.png) | [![Extend expiry](docs/screenshots/04-extend-expiry.png)](docs/screenshots/04-extend-expiry.png) |
+
 ## Run
 
 Requires [Bun](https://bun.sh) (npm also works — swap `bun` for `npm run`).
