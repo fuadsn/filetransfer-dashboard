@@ -1,7 +1,5 @@
 # Short note — decisions, trade-offs, AI tools
 
-> Rough draft for the submission note.
-
 ## Decisions
 
 - **The transfer is the unit, not the file.** Every screen is organized around a
