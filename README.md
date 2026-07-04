@@ -8,10 +8,13 @@ Mock data only — no backend, no auth, no real upload.
 
 ## Run
 
+Requires [Bun](https://bun.sh) (npm also works — swap `bun` for `npm run`).
+
 ```bash
 bun install
 bun dev          # http://localhost:5173
 bun run build    # typecheck + production build
+bun run preview  # serve the production build
 bun run lint
 ```
 
@@ -34,12 +37,13 @@ primitives) · **react-router** · **Fuse.js** (fuzzy search) · **Motion**
   from `expiresAt` vs. the clock on every render; only `disabled` is a stored,
   manual state (the sender killed the link). A stored status enum would go stale
   the instant time moved. → `deriveStatus()` in `src/lib/format.ts`.
-- **"Needs attention" is the headline, and it's split by severity.** Flagged
-  transfers live in a dedicated right sidebar, in two sections:
-  **Security** (critical — a post-disable access attempt; red) pinned above
-  **Needs attention** (time-based warnings — expiring <24h, sent-into-the-void
-  48h+; amber). Security **bypasses time** to the top; everything else sorts by
-  soonest expiry. Each row explains *why* with a reason label. → `src/lib/attention.ts`,
+- **"Needs attention" complements the list — it doesn't mirror it.** Flagged
+  transfers live in a right sidebar with three parts: an **At a glance** metrics
+  summary (counts by reason, soonest deadline, bytes at risk), a **Security**
+  section (critical post-disable access attempts, red, always pinned as rows),
+  and a **filter-aware Needs attention** section that surfaces items *hidden by
+  the current filter* (and lists them when unfiltered). Severity ranks security
+  above time-based warnings, and each row explains *why*. → `src/lib/attention.ts`,
   `src/components/Sidebar.tsx`.
 - **User actions are layered over the mock baseline.** Favorites, disables, and
   extended expiries are stored as an override map in `localStorage` and merged on
@@ -99,7 +103,11 @@ primitives) · **react-router** · **Fuse.js** (fuzzy search) · **Motion**
   (`src/lib/useFavoritePop.ts`, Motion).
 - **Filter / search** → chips toggle; rows **fade + reflow** as the list changes
   (Motion `AnimatePresence` / `layout` in `TransferList`).
-- **Extend expiry** → modal with `+1d / +7d / +30d` quick-chips or a date input.
+- **Extend expiry** → modal with `+1d / +7d / +30d` quick-chips or a **themed
+  calendar** popover (custom, follows the palette in both modes).
+- **File preview** → click a file to preview it in-app (image / video / PDF);
+  non-previewable types explain via a toast, and disabled links lock previews.
+  → `src/components/FilePreview.tsx`.
 - **Theme switch** → circular reveal from the toggle via the View Transitions API.
 - **Status dots** pulse per status (soft/fast blink, throb) and are **phase-synced**
   across same-status pills.
@@ -135,13 +143,15 @@ src/
     StatusPill.tsx       status pill with synced pulsing dot
     Avatar.tsx           photo avatar + initials fallback + stack
     States.tsx           skeleton / empty / no-results
-    TransferDetail.tsx   detail screen + actions
+    TransferDetail.tsx   detail screen + actions + file list
+    FilePreview.tsx      in-app image / video / PDF preview modal
     ExtendExpiryModal.tsx / ThemeToggle.tsx
   App.tsx                shell: routes ("/" · "/transfers/:id"), sidebar, overlays
   index.css              design tokens (both themes) + animations
 ```
 
 Data model, mock generator, needs-attention logic, search/filter, all states,
-the detail screen + actions, micro-interactions, and localStorage persistence
-are complete. Both **dark and light** themes ship; layout is **responsive**
-(sidebar becomes an overlay drawer on mobile).
+the detail screen + actions, file preview, micro-interactions, and localStorage
+persistence are complete. Both **dark and light** themes ship; layout is
+**responsive** (rows collapse and the sidebar becomes an overlay drawer on
+mobile).
