@@ -16,10 +16,22 @@
   top of the generated data (`src/lib/useTransfers.ts`). Regenerating mock data
   never wipes the user's changes. UI state (search, filters, sidebar, theme) is
   persisted too, so a refresh feels like a real app.
-- **Fuzzy, tiered search that respects the filters.** The pill filters
-  (starred / member / status) gate the set *first*, then a Fuse.js query runs
-  over that subset, tiered title → sender → file so the strongest hit leads.
-  → `src/lib/filter.ts`.
+- **Fuzzy, tiered search that respects the filters.** Filtering runs in two
+  stages, in a deliberate order: the *exact* pill filters narrow the set first,
+  then the fuzzy text query runs only over what's left — so search never reaches
+  past the pills you've selected (and the Fuse index is cached per scope, only
+  rebuilt when the pills change, not on every keystroke).
+  - **Pills stack.** Three categories combine with **AND**: **Starred**
+    (favorites only), **Member** (transfers you sent *or* received), and
+    **Status**. Within Member and Status the choices are multi-select and
+    **OR**-combined — pick *Maya* + *Diego* to see both, or *Expiring* +
+    *Expired* together. So you can express "starred transfers involving Maya
+    **or** Diego that are expiring **or** expired," and every combination stays
+    persisted across refreshes.
+  - **Text is fuzzy and tiered.** The query (Fuse.js, typo-tolerant) matches
+    across title → sender name → file names, ranked in that order, so a title hit
+    outranks a filename hit and each transfer surfaces once at its strongest tier.
+  → `src/lib/filter.ts`, `src/components/SearchFilterBar.tsx`.
 
 ## Trade-offs
 
@@ -28,14 +40,10 @@
 - **Client-side routing** (`BrowserRouter`) gives real, deep-linkable
   `/transfers/:id` URLs; a static host would need an SPA fallback in production
   (dev/preview already handle it).
-- **No list virtualization.** Every transfer renders a real DOM row (with its
-  animated mount/exit via Motion). At 10 rows that's effortless and keeps the
-  code simple — no windowing library, no measured row heights, no scroll math.
-  It also means the whole list animates and re-flows smoothly on filter/search.
-  The cost is that it wouldn't scale: a few thousand rows would bog down layout
-  and the enter/exit animations. The fix at that point is windowing (e.g.
-  `@tanstack/virtual` / `react-window`) to render only the visible slice — a
-  deliberate deferral, since it adds complexity this dataset doesn't warrant.
+- **No list virtualization.** Every row is a real DOM node, so the whole list
+  animates and re-flows smoothly on filter/search — simpler, and fine for 10
+  rows. It wouldn't scale to thousands; the fix there is windowing (react-window
+  / `@tanstack/virtual`), a deliberate deferral this dataset doesn't warrant.
 
 ## AI tools used
 
